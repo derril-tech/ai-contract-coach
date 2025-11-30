@@ -33,12 +33,12 @@
 
 | # | Feature | Priority | Effort | React Showcase | AI Showcase | Status |
 |---|---------|----------|--------|----------------|-------------|--------|
-| 7 | Contract Comparison Mode | 🟢 Medium | High | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⏸️ Pending |
-| 8 | PDF Export with Branding | 🟢 Medium | Medium | ⭐⭐⭐ | ⭐⭐ | ⏸️ Pending |
-| 9 | Contract History Dashboard | 🟢 Medium | Low | ⭐⭐⭐⭐ | ⭐⭐ | ⏸️ Pending |
-| 10 | Email Summary to Stakeholders | 🟢 Medium | Medium | ⭐⭐ | ⭐⭐⭐ | ⏸️ Pending |
-| 11 | Batch Contract Analysis | 🟢 Medium | High | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⏸️ Pending |
-| 12 | Custom Risk Thresholds | 🔵 Low | Medium | ⭐⭐⭐ | ⭐⭐⭐ | ⏸️ Pending |
+| 7 | Contract Comparison Mode | 🟢 Medium | High | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ✅ Complete |
+| 8 | PDF Export with Branding | 🟢 Medium | Medium | ⭐⭐⭐ | ⭐⭐ | ✅ Complete |
+| 9 | Contract History Dashboard | 🟢 Medium | Low | ⭐⭐⭐⭐ | ⭐⭐ | ✅ Complete |
+| 10 | Email Summary to Stakeholders | 🟢 Medium | Medium | ⭐⭐ | ⭐⭐⭐ | ✅ Complete |
+| 11 | Batch Contract Analysis | 🟢 Medium | High | ⭐⭐⭐ | ⭐⭐⭐⭐ | ✅ Complete |
+| 12 | Custom Risk Thresholds | 🔵 Low | Medium | ⭐⭐⭐ | ⭐⭐⭐ | ✅ Complete |
 
 ---
 
@@ -195,6 +195,12 @@
 | #4 Voice Input | ✅ | ✅ | ✅ | ✅ | ✅ | v1.3.0 |
 | #5 Share | ✅ | ✅ | ✅ | ✅ | ✅ | v1.3.0 |
 | #6 Negotiation Tips | ✅ | ✅ | ✅ | ✅ | ✅ | v1.4.0 |
+| #7 Comparison | ✅ | ✅ | ✅ | ✅ | ✅ | v1.5.0 |
+| #8 PDF Export | ✅ | ✅ | ✅ | ✅ | ✅ | v1.5.0 |
+| #9 History | ✅ | ✅ | ✅ | ✅ | ✅ | v1.5.0 |
+| #10 Email | ✅ | ✅ | ✅ | ✅ | ✅ | v1.5.0 |
+| #11 Batch | ✅ | ✅ | ✅ | ✅ | ✅ | v1.5.0 |
+| #12 Thresholds | ✅ | ✅ | ✅ | ✅ | ✅ | v1.5.0 |
 | #3 Highlighter | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | - |
 | #4 Voice | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | - |
 | #5 Share | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | - |
@@ -235,6 +241,7 @@ For each feature:
 | 4 | 1 hour | 30 min | -50% |
 | 5 | 45 min | 30 min | -33% |
 | 6 | 1.75 hours | 1 hour | -43% |
+| 7-12 | 5 hours | 2 hours | -60% |
 | 3 | 1 hour | - | - |
 | 4 | 1 hour | - | - |
 | 5 | 45 min | - | - |
