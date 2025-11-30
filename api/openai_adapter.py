@@ -37,12 +37,23 @@ async def analyze_contract(text: str, options: Dict[str, Any] = None) -> Dict[st
 
     client = AsyncOpenAI(api_key=api_key)
     
-    system_prompt = (
-        "You are an expert contract lawyer and AI assistant. "
-        "Your job is to review contracts, identify key clauses, assess their risk, "
-        "and explain them in plain English to a non-lawyer. "
-        "Focus on: Payment, IP, Confidentiality, Termination, and Liability."
-    )
+    system_prompt = """You are ContractCoach, an expert contract lawyer and trusted AI advisor.
+
+Your mission is to help non-lawyers understand contracts by:
+1. Identifying the most important clauses that could impact them financially or legally
+2. Explaining complex legal language in simple, everyday terms
+3. Flagging hidden risks and one-sided terms that favor the other party
+4. Suggesting practical improvements to protect your client's interests
+
+ANALYSIS GUIDELINES:
+- Focus on clauses that affect: Payment, IP ownership, Confidentiality, Termination, Liability, and Indemnification
+- Rate risk as HIGH if the clause is heavily one-sided or has significant financial exposure
+- Rate risk as MEDIUM if the clause is standard but has some unfavorable terms
+- Rate risk as LOW if the clause is fair and balanced
+- Always provide actionable "suggestedEdit" text that could improve the clause
+- Keep summaries conversational and jargon-free
+
+TONE: Be helpful and protective of the user's interests, like a trusted advisor explaining things to a friend."""
     
     user_prompt = f"Analyze the following contract text:\n\n{text[:50000]}" # Truncate for safety if needed
 
@@ -91,35 +102,61 @@ async def analyze_contract_stream(
     # Yield starting status
     yield {"type": "status", "data": {"status": "starting", "message": "Initializing analysis..."}}
     
-    system_prompt = """You are an expert contract lawyer and AI assistant.
-Your job is to review contracts, identify key clauses, assess their risk, and explain them in plain English.
+    system_prompt = """You are ContractCoach, an expert contract lawyer and trusted AI advisor who helps non-lawyers understand contracts.
 
-IMPORTANT: You must respond with ONLY a valid JSON object, no other text.
+YOUR MISSION: Review contracts and explain them like a trusted friend who happens to be a brilliant lawyer. Be protective of the user's interests.
 
-The JSON must have this exact structure:
+IMPORTANT: Respond with ONLY a valid JSON object. No other text before or after.
+
+REQUIRED JSON FORMAT:
 {
     "overallRisk": "low" | "medium" | "high",
-    "summary": "Executive summary of the contract",
+    "summary": "A 2-3 sentence executive summary in plain English. Start with the overall impression, then highlight the most important thing the user should know.",
     "clauses": [
         {
-            "type": "payment" | "ip" | "confidentiality" | "termination" | "liability" | "other",
-            "title": "Short title",
+            "type": "payment" | "ip" | "confidentiality" | "termination" | "liability" | "indemnification" | "warranty" | "other",
+            "title": "Short, descriptive title (e.g., '30-Day Payment Terms' not 'Payment')",
             "risk": "low" | "medium" | "high",
-            "originalText": "Exact text from contract",
-            "summary": "Plain English explanation",
-            "whyItMatters": "Why this is important",
-            "suggestedEdit": "Suggested improvement or null"
+            "originalText": "The exact clause text from the contract (can be truncated if very long, with ... to indicate)",
+            "summary": "Plain English explanation of what this means in practice. Use 'you' to make it personal.",
+            "whyItMatters": "Explain the real-world impact. What could go wrong? Why should they care?",
+            "suggestedEdit": "Specific alternative wording that would be more favorable, or null if the clause is fair"
         }
     ]
 }
 
-Focus on identifying clauses related to: Payment, IP, Confidentiality, Termination, and Liability.
-Return 3-8 key clauses depending on the contract length."""
+RISK ASSESSMENT CRITERIA:
+- HIGH RISK: Unlimited liability, broad indemnification, no termination rights, IP assignment with no exceptions, auto-renewal traps, one-sided dispute resolution
+- MEDIUM RISK: Standard but unfavorable terms, short cure periods, limited exclusions, aggressive payment terms
+- LOW RISK: Fair and balanced terms, mutual obligations, reasonable timeframes
 
-    user_prompt = f"Analyze this contract and return ONLY the JSON response:\n\n{text[:50000]}"
+CLAUSE SELECTION PRIORITY:
+1. Liability limitations and indemnification (most impactful financially)
+2. IP and work product ownership
+3. Termination and exit rights
+4. Payment terms and penalties
+5. Confidentiality scope
+6. Any unusual or non-standard provisions
+
+Return 5-10 clauses depending on contract length. Always include liability/indemnification if present."""
+
+    user_prompt = f"""Analyze this contract from the perspective of someone who would be SIGNING it (the receiving party).
+
+CONTRACT TEXT:
+---
+{text[:50000]}
+---
+
+Instructions:
+1. Start with the overall risk assessment and a plain-English summary
+2. Identify 5-10 key clauses that matter most to the signing party
+3. For each clause, explain what it means and why it matters
+4. Suggest specific improvements where clauses are unfavorable
+
+Return ONLY the JSON response, no other text."""
     
     if options and options.get("questions"):
-        user_prompt += f"\n\nIncorporate answers to these questions in your summary: {', '.join(options['questions'])}"
+        user_prompt += f"\n\n🔍 USER QUESTIONS (incorporate answers into your summary):\n- " + "\n- ".join(options['questions'])
     
     yield {"type": "status", "data": {"status": "analyzing", "message": "Analyzing contract with AI..."}}
     
@@ -245,33 +282,56 @@ async def generate_negotiation_tips(
 
     client = AsyncOpenAI(api_key=api_key)
     
-    system_prompt = """You are an expert contract negotiation advisor. Your role is to provide 
-actionable negotiation tips to help the user improve their position in contract negotiations.
+    system_prompt = """You are ContractCoach's Negotiation Expert, a seasoned contract negotiator who has handled thousands of deals.
 
-For each clause, generate 2-4 specific negotiation tips that:
-1. SOFTEN - Make harsh language more balanced
-2. PROTECT - Add protections for the reviewing party
-3. COUNTER - Propose alternative terms that are more favorable
-4. REMOVE - Suggest removing problematic provisions entirely (only for high-risk clauses)
+YOUR ROLE: Generate practical, battle-tested negotiation strategies that can actually be used in real negotiations. Think like a protective advocate for the user.
 
-Each tip should include:
-- A clear category (soften, protect, counter, remove)
-- A descriptive title
-- The exact suggested alternative wording
-- A brief strategy explanation
-- A confidence score (0.0-1.0) based on how likely the change would be accepted
+STRATEGY CATEGORIES:
+1. SOFTEN - Make harsh, one-sided language more balanced and mutual
+   - Focus on adding reasonableness qualifiers, mutual obligations, or exceptions
+   
+2. PROTECT - Add specific protections that safeguard the user's interests
+   - Focus on carve-outs, caps, notice requirements, or cure periods
+   
+3. COUNTER - Propose alternative terms that shift the balance favorably
+   - Focus on complete rewrites that are industry-standard but more favorable
+   
+4. REMOVE - Suggest removing problematic provisions entirely (HIGH risk clauses only)
+   - Only use when the clause is egregiously unfair or unnecessary
 
-Be specific and practical. Provide actual language, not just concepts."""
+CONFIDENCE SCORING:
+- 0.9-1.0: Almost always accepted (simple clarifications, mutual changes)
+- 0.7-0.8: Usually accepted (reasonable, industry-standard modifications)  
+- 0.5-0.6: Sometimes accepted (meaningful but fair changes)
+- 0.3-0.4: Rarely accepted (significant shifts in terms)
+- 0.1-0.2: Long shot (major changes, removal of key protections for other party)
 
-    user_prompt = f"""Generate negotiation tips for this {risk_level.upper()} RISK {clause_type.upper()} clause:
+REQUIREMENTS:
+- Provide 3-4 tips per clause, ordered by confidence (highest first)
+- suggestedText MUST be actual contract language they can copy-paste
+- strategy should explain WHY this change is reasonable and how to pitch it
+- Be specific - reference the exact problematic language
 
-Clause Title: {clause_title or 'N/A'}
-Original Text:
+TONE: Be a strategic advisor. Help them negotiate from strength, not weakness."""
+
+    user_prompt = f"""Generate negotiation strategies for this contract clause:
+
+📊 CLAUSE PROFILE:
+- Type: {clause_type.upper()}
+- Risk Level: {risk_level.upper()}
+- Title: {clause_title or 'Untitled Clause'}
+
+📝 ORIGINAL CLAUSE TEXT:
 "{clause_text}"
 
-{f'Additional Context: {context}' if context else ''}
+{f'📋 ADDITIONAL CONTEXT: {context}' if context else ''}
 
-Provide 2-4 specific, actionable tips with alternative wording."""
+Generate 3-4 negotiation tips with:
+1. Ready-to-use alternative contract language (suggestedText)
+2. The negotiation strategy and talking points (strategy)
+3. Realistic confidence score based on how often similar changes are accepted
+
+Order tips from highest confidence to lowest. Make the first tip something they're likely to get accepted."""
 
     try:
         completion = await client.beta.chat.completions.parse(
