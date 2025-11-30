@@ -16,10 +16,10 @@ export function Hero() {
   const posterSrc = isDark ? "/Screenshot-dark.png" : "/Screenshot-light.png";
 
   return (
-    <section className="relative overflow-hidden border-b border-border-subtle bg-bg-page">
+    <section className="relative overflow-hidden border-b border-border-subtle">
       <div className="mx-auto flex min-h-[85vh] max-w-7xl items-center px-6 py-16 md:px-12 lg:py-24">
         {/* === BACKGROUND LAYER === */}
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <video
             key={videoSrc}
             className="h-full w-full origin-center scale-105 object-cover opacity-90 transition-opacity duration-1000"
@@ -51,7 +51,7 @@ export function Hero() {
         </div>
 
         {/* === FOREGROUND CONTENT LAYER === */}
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-8 items-center w-full">
+        <div className="relative z-10 grid gap-12 lg:grid-cols-2 lg:gap-8 items-center w-full">
           <div className="flex flex-col items-start space-y-8">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
