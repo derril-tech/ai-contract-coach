@@ -26,6 +26,9 @@ import { StreamingClauses } from "@/components/playground/streaming-clauses";
 import { AnalysisProgress } from "@/components/playground/analysis-progress";
 import { RiskMeter, RiskBadge } from "@/components/playground/risk-meter";
 import { RiskSummaryCard } from "@/components/playground/risk-summary-card";
+import { ClauseHighlighter } from "@/components/playground/clause-highlighter";
+import { VoiceInput } from "@/components/playground/voice-input";
+import { ShareButton, QuickCopyButton } from "@/components/playground/share-button";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Sample contract for demo
@@ -294,12 +297,23 @@ export default function PlaygroundPage() {
                   exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <RiskSummaryCard
-                    risk={overallRisk}
-                    clauses={clauses}
-                    summary={summary}
-                    isStreaming={isStreaming}
-                  />
+                  <div className="relative">
+                    {/* Share button in top right */}
+                    <div className="absolute top-3 right-3 z-10">
+                      <ShareButton
+                        risk={overallRisk}
+                        clauses={clauses}
+                        summary={summary}
+                        contractName="Contract Analysis"
+                      />
+                    </div>
+                    <RiskSummaryCard
+                      risk={overallRisk}
+                      clauses={clauses}
+                      summary={summary}
+                      isStreaming={isStreaming}
+                    />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -320,10 +334,11 @@ export default function PlaygroundPage() {
                 {selectedClause ? (
                   <>
                     <Tabs defaultValue="plain" className="w-full">
-                      <TabsList className="grid w-full grid-cols-3 bg-bg-subtle/50">
+                      <TabsList className="grid w-full grid-cols-4 bg-bg-subtle/50">
                         <TabsTrigger value="plain" className="text-[10px]">Plain English</TabsTrigger>
                         <TabsTrigger value="risk" className="text-[10px]">Risk & Flags</TabsTrigger>
                         <TabsTrigger value="edit" className="text-[10px]">Suggested Edit</TabsTrigger>
+                        <TabsTrigger value="context" className="text-[10px]">In Context</TabsTrigger>
                       </TabsList>
                       <div className="mt-3 min-h-[100px]">
                         <TabsContent value="plain" className="mt-0 space-y-2 animate-in fade-in duration-300">
@@ -371,11 +386,29 @@ export default function PlaygroundPage() {
                             {selectedClause.suggestedEdit || "No edit suggested for this clause."}
                           </motion.div>
                         </TabsContent>
+                        <TabsContent value="context" className="mt-0 animate-in fade-in duration-300">
+                          <motion.div 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="rounded-md border border-border-subtle/50 bg-bg-subtle/20 overflow-hidden"
+                          >
+                            <ClauseHighlighter
+                              contractText={contractText}
+                              clauses={clauses}
+                              selectedClauseId={selectedClause?.id ?? null}
+                              onSelectClause={setSelectedClause}
+                              className="h-[200px]"
+                            />
+                          </motion.div>
+                        </TabsContent>
                       </div>
                     </Tabs>
 
                     <div className="space-y-2 pt-2">
-                      <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">Original Clause Text</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">Original Clause Text</p>
+                        <QuickCopyButton text={selectedClause.originalText} />
+                      </div>
                       <div className="max-h-32 overflow-y-auto rounded-md border border-border-subtle/70 bg-bg-subtle/30 p-3 text-[10px] font-mono text-text-secondary leading-relaxed">
                         {selectedClause.originalText}
                       </div>
@@ -456,19 +489,32 @@ export default function PlaygroundPage() {
                 </ScrollArea>
 
                 <div className="space-y-3 pt-2 border-t border-border-subtle/30 mt-auto">
-                  <Textarea
-                    rows={2}
-                    placeholder="Ask about negotiation strategy..."
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleAsk();
-                      }
-                    }}
-                    className="text-xs resize-none bg-bg-subtle/30 focus:bg-bg-elevated transition-colors"
-                  />
+                  <div className="relative">
+                    <Textarea
+                      rows={2}
+                      placeholder="Ask about negotiation strategy..."
+                      value={question}
+                      onChange={(e) => setQuestion(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleAsk();
+                        }
+                      }}
+                      className="text-xs resize-none bg-bg-subtle/30 focus:bg-bg-elevated transition-colors pr-10"
+                    />
+                    {/* Voice Input Button */}
+                    <div className="absolute right-2 top-2">
+                      <VoiceInput
+                        onTranscript={(text) => setQuestion(text)}
+                        onSubmit={(text) => {
+                          setQuestion(text);
+                          handleAsk();
+                        }}
+                        disabled={isRunning}
+                      />
+                    </div>
+                  </div>
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-[10px] text-text-muted/80 italic">
                       AI generated content. Verify with legal counsel.
