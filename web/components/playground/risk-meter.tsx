@@ -129,7 +129,7 @@ export function RiskBadge({ risk, className }: { risk: "low" | "medium" | "high"
       animate={{ scale: 1 }}
       transition={{ type: "spring", stiffness: 500 }}
       className={cn(
-        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium",
+        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium",
         config.bgColor + "/10",
         config.textColor,
         className

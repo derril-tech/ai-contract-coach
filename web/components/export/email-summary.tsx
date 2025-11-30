@@ -236,7 +236,7 @@ export function EmailSummaryButton({ contractName, risk, clauses, summary }: Ema
                   )}>
                     {risk?.toUpperCase()} RISK
                   </Badge>
-                  <span className="text-[10px] text-text-muted">
+                  <span className="text-[11px] text-text-muted">
                     {clauses.length} clauses analyzed
                   </span>
                 </div>
@@ -244,7 +244,7 @@ export function EmailSummaryButton({ contractName, risk, clauses, summary }: Ema
                   {summary || "No summary available"}
                 </p>
                 {clauses.filter(c => c.risk === "high").length > 0 && (
-                  <div className="text-[10px] text-red-500">
+                  <div className="text-[11px] text-red-500">
                     ⚠️ {clauses.filter(c => c.risk === "high").length} high-risk clause(s) identified
                   </div>
                 )}

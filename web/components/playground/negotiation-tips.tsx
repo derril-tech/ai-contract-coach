@@ -296,7 +296,7 @@ export function NegotiationTips({ clause, className }: NegotiationTipsProps) {
                       {/* Expand/Collapse for strategy */}
                       <button
                         onClick={() => setExpandedTip(isExpanded ? null : tip.id)}
-                        className="flex items-center gap-1 text-[10px] text-text-muted hover:text-text-primary transition-colors"
+                        className="flex items-center gap-1 text-[11px] text-text-muted hover:text-text-primary transition-colors"
                       >
                         {isExpanded ? (
                           <>
@@ -321,7 +321,7 @@ export function NegotiationTips({ clause, className }: NegotiationTipsProps) {
                             className="overflow-hidden"
                           >
                             <div className="mt-2 pt-2 border-t border-border-subtle/30">
-                              <p className="text-[10px] text-text-secondary leading-relaxed">
+                              <p className="text-[11px] text-text-secondary leading-relaxed">
                                 <span className="font-semibold text-text-primary">Strategy: </span>
                                 {tip.strategy}
                               </p>
@@ -364,7 +364,7 @@ export function NegotiationTips({ clause, className }: NegotiationTipsProps) {
                 <p className="text-xs text-text-muted mb-1">
                   Ready to help you negotiate
                 </p>
-                <p className="text-[10px] text-text-muted/70">
+                <p className="text-[11px] text-text-muted/70">
                   Click "Generate Tips" for AI-powered suggestions
                 </p>
               </div>

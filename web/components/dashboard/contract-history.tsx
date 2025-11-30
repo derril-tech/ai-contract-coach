@@ -118,7 +118,7 @@ export function ContractHistory({ onSelectEntry, className }: ContractHistoryPro
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary" />
             <CardTitle className="text-sm font-semibold">Analysis History</CardTitle>
-            <Badge variant="outline" className="text-[10px]">
+            <Badge variant="outline" className="text-[11px]">
               {history.length} contracts
             </Badge>
           </div>
@@ -210,7 +210,7 @@ export function ContractHistory({ onSelectEntry, className }: ContractHistoryPro
                             {entry.overallRisk}
                           </Badge>
                         </div>
-                        <p className="text-[10px] text-text-muted mt-0.5 line-clamp-1">
+                        <p className="text-[11px] text-text-muted mt-0.5 line-clamp-1">
                           {entry.summary}
                         </p>
                         <div className="flex items-center gap-3 mt-1">

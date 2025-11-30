@@ -187,7 +187,7 @@ export function RiskDonut({
             className="text-center"
           >
             <div className="text-2xl font-bold text-text-primary">{total}</div>
-            <div className="text-[10px] text-text-muted">Clauses</div>
+            <div className="text-[11px] text-text-muted">Clauses</div>
           </motion.div>
         </div>
       </div>
@@ -206,7 +206,7 @@ export function RiskDonut({
             return (
               <div key={risk} className="flex items-center gap-1.5">
                 <span className={cn("h-2.5 w-2.5 rounded-full", riskColors[risk].bg)} />
-                <span className="text-[10px] text-text-secondary">
+                <span className="text-[11px] text-text-secondary">
                   {count} {riskColors[risk].label.split(" ")[0]}
                 </span>
               </div>

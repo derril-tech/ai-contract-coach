@@ -188,7 +188,7 @@ export function BatchAnalysis({ onAnalyze, className }: BatchAnalysisProps) {
             <Layers className="h-4 w-4 text-primary" />
             <CardTitle className="text-sm font-semibold">Batch Analysis</CardTitle>
             {queue.length > 0 && (
-              <Badge variant="outline" className="text-[10px]">
+              <Badge variant="outline" className="text-[11px]">
                 {queue.length} contracts
               </Badge>
             )}
@@ -343,13 +343,13 @@ export function BatchAnalysis({ onAnalyze, className }: BatchAnalysisProps) {
                         >
                           {contract.result.risk.toUpperCase()}
                         </Badge>
-                        <span className="text-[10px] text-text-muted">
+                        <span className="text-[11px] text-text-muted">
                           {contract.result.clauseCount} clauses
                         </span>
                       </div>
                     )}
                     {contract.error && (
-                      <p className="text-[10px] text-red-500 mt-1">{contract.error}</p>
+                      <p className="text-[11px] text-red-500 mt-1">{contract.error}</p>
                     )}
                   </div>
 

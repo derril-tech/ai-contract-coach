@@ -210,16 +210,16 @@ export function ContractComparison({ comparison, onClose, className }: ContractC
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
           <TabsList className="grid w-full grid-cols-3 bg-bg-subtle/30 rounded-none border-b border-border-subtle/30">
-            <TabsTrigger value="overview" className="text-[10px]">Overview</TabsTrigger>
-            <TabsTrigger value="clauses" className="text-[10px]">Clause Changes</TabsTrigger>
-            <TabsTrigger value="diff" className="text-[10px]">Side by Side</TabsTrigger>
+            <TabsTrigger value="overview" className="text-[11px]">Overview</TabsTrigger>
+            <TabsTrigger value="clauses" className="text-[11px]">Clause Changes</TabsTrigger>
+            <TabsTrigger value="diff" className="text-[11px]">Side by Side</TabsTrigger>
           </TabsList>
 
           <ScrollArea className="h-[400px]">
             <TabsContent value="overview" className="mt-0 p-4 space-y-4">
               {/* Risk Comparison */}
               <div>
-                <h4 className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-2">
+                <h4 className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2">
                   Risk Level Change
                 </h4>
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-bg-subtle/30">
@@ -242,7 +242,7 @@ export function ContractComparison({ comparison, onClose, className }: ContractC
 
               {/* Summary */}
               <div>
-                <h4 className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-2">
+                <h4 className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2">
                   Key Differences
                 </h4>
                 <div className="space-y-2">
@@ -306,7 +306,7 @@ export function ContractComparison({ comparison, onClose, className }: ContractC
                         </Badge>
                       )}
                     </div>
-                    <p className="text-[10px] text-text-muted line-clamp-2">
+                    <p className="text-[11px] text-text-muted line-clamp-2">
                       {(match.clauseA || match.clauseB)?.summary}
                     </p>
                   </motion.div>
@@ -331,13 +331,13 @@ export function ContractComparison({ comparison, onClose, className }: ContractC
                       <div className="grid grid-cols-2 gap-3">
                         <div className="rounded-md bg-red-500/5 border border-red-500/10 p-2">
                           <p className="text-[9px] text-red-600 font-medium mb-1">Original</p>
-                          <p className="text-[10px] text-text-secondary line-clamp-4">
+                          <p className="text-[11px] text-text-secondary line-clamp-4">
                             {match.clauseA?.originalText}
                           </p>
                         </div>
                         <div className="rounded-md bg-emerald-500/5 border border-emerald-500/10 p-2">
                           <p className="text-[9px] text-emerald-600 font-medium mb-1">New Version</p>
-                          <p className="text-[10px] text-text-secondary line-clamp-4">
+                          <p className="text-[11px] text-text-secondary line-clamp-4">
                             {match.clauseB?.originalText}
                           </p>
                         </div>

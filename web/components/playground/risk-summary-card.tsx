@@ -45,7 +45,7 @@ export function RiskSummaryCard({
             <motion.div
               animate={{ opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 1.5, repeat: Infinity }}
-              className="text-[10px] text-accent font-medium"
+              className="text-[11px] text-accent font-medium"
             >
               Analyzing...
             </motion.div>
@@ -84,7 +84,7 @@ export function RiskSummaryCard({
 
             {/* Distribution */}
             <div className="pt-2 border-t border-border-subtle/30">
-              <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-3">
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-3">
                 Clause Distribution
               </p>
               <RiskDonut clauses={clauses} size="sm" showLegend={true} />
@@ -120,7 +120,7 @@ export function RiskSummaryCard({
                 transition={{ delay: 2 }}
                 className="pt-3 border-t border-border-subtle/30"
               >
-                <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-2">
+                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2">
                   AI Summary
                 </p>
                 <p className="text-xs text-text-secondary leading-relaxed line-clamp-3">

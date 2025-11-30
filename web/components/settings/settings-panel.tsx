@@ -128,7 +128,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                             step={5}
                             className="w-full"
                           />
-                          <p className="text-[10px] text-text-muted">
+                          <p className="text-[11px] text-text-muted">
                             Scores below this are considered low risk
                           </p>
                         </div>
@@ -149,7 +149,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                             step={5}
                             className="w-full"
                           />
-                          <p className="text-[10px] text-text-muted">
+                          <p className="text-[11px] text-text-muted">
                             Scores above this are high risk
                           </p>
                         </div>
@@ -170,7 +170,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                             step={1}
                             className="w-full"
                           />
-                          <p className="text-[10px] text-text-muted">
+                          <p className="text-[11px] text-text-muted">
                             Warn if contract has more than this many high-risk clauses
                           </p>
                         </div>
@@ -182,8 +182,8 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                             {Object.entries(settings.riskThresholds.clauseWeights).map(([type, weight]) => (
                               <div key={type} className="space-y-1">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-[10px] text-text-muted capitalize">{type}</span>
-                                  <span className="text-[10px] font-medium">{weight}x</span>
+                                  <span className="text-[11px] text-text-muted capitalize">{type}</span>
+                                  <span className="text-[11px] font-medium">{weight}x</span>
                                 </div>
                                 <Slider
                                   value={[weight * 10]}
@@ -241,7 +241,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                         <div className="flex items-center justify-between">
                           <div>
                             <Label className="text-xs">Show Confidence Scores</Label>
-                            <p className="text-[10px] text-text-muted">Display AI confidence on tips</p>
+                            <p className="text-[11px] text-text-muted">Display AI confidence on tips</p>
                           </div>
                           <Switch
                             checked={settings.displayPreferences.showConfidenceScores}
@@ -259,7 +259,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                         <div className="flex items-center justify-between">
                           <div>
                             <Label className="text-xs">Auto-expand Tips</Label>
-                            <p className="text-[10px] text-text-muted">Show strategy by default</p>
+                            <p className="text-[11px] text-text-muted">Show strategy by default</p>
                           </div>
                           <Switch
                             checked={settings.displayPreferences.autoExpandTips}
@@ -277,7 +277,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                         <div className="flex items-center justify-between">
                           <div>
                             <Label className="text-xs">Animations</Label>
-                            <p className="text-[10px] text-text-muted">Enable UI animations</p>
+                            <p className="text-[11px] text-text-muted">Enable UI animations</p>
                           </div>
                           <Switch
                             checked={settings.displayPreferences.animationsEnabled}
@@ -295,7 +295,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                         <div className="flex items-center justify-between">
                           <div>
                             <Label className="text-xs">Compact Mode</Label>
-                            <p className="text-[10px] text-text-muted">Reduce spacing and padding</p>
+                            <p className="text-[11px] text-text-muted">Reduce spacing and padding</p>
                           </div>
                           <Switch
                             checked={settings.displayPreferences.compactMode}
@@ -346,7 +346,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                         <div className="flex items-center justify-between">
                           <div>
                             <Label className="text-xs">Email on High Risk</Label>
-                            <p className="text-[10px] text-text-muted">Send email when high-risk contract detected</p>
+                            <p className="text-[11px] text-text-muted">Send email when high-risk contract detected</p>
                           </div>
                           <Switch
                             checked={settings.notifications.emailOnHighRisk}

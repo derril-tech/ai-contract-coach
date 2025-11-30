@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,6 +11,8 @@ import { AppShell } from "@/components/layout/app-shell";
 import { RiskDonut } from "@/components/playground/risk-donut";
 import { RiskBar } from "@/components/playground/risk-summary-card";
 import { ContractHistory } from "@/components/dashboard/contract-history";
+import { PullToRefreshIndicator } from "@/components/ui/pull-to-refresh";
+import usePullToRefresh from "@/hooks/usePullToRefresh";
 import { motion } from "framer-motion";
 
 const mockContracts = [
@@ -72,16 +75,35 @@ function RiskBadge({ risk }: { risk: "low" | "medium" | "high" }) {
     high: "bg-red-500/10 text-red-600 border-red-500/30",
   };
   return (
-    <Badge variant="outline" className={`text-[10px] font-medium px-2 py-0.5 border capitalize ${map[risk] ?? ""}`}>
+    <Badge variant="outline" className={`text-[11px] font-medium px-2 py-0.5 border capitalize ${map[risk] ?? ""}`}>
       {risk} risk
     </Badge>
   );
 }
 
 export default function DashboardPage() {
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  
+  const handleRefresh = useCallback(async () => {
+    // Simulate data refresh
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setLastRefresh(new Date());
+    // In a real app, this would fetch fresh data from the API
+  }, []);
+
+  const { containerRef, pullDistance, isRefreshing, canRefresh } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
+
   return (
     <AppShell>
-      <div className="space-y-8">
+      <div ref={containerRef} className="space-y-8 overflow-auto">
+        {/* Pull-to-Refresh Indicator */}
+        <PullToRefreshIndicator
+          pullDistance={pullDistance}
+          isRefreshing={isRefreshing}
+          canRefresh={canRefresh}
+        />
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-text-primary">Dashboard</h1>
@@ -128,7 +150,7 @@ export default function DashboardPage() {
                         <div className="flex flex-col items-end gap-1.5 shrink-0">
                           <RiskBadge risk={c.risk} />
                           <RiskBar clauses={c.clauses} className="w-16" />
-                          <span className="text-[10px] text-text-muted">{c.lastReviewed}</span>
+                          <span className="text-[11px] text-text-muted">{c.lastReviewed}</span>
                         </div>
                       </Link>
                     </li>

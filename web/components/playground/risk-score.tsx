@@ -135,7 +135,7 @@ export function RiskScore({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2 }}
-        className="text-[10px] text-text-muted mt-2"
+        className="text-[11px] text-text-muted mt-2"
       >
         {config.description}
       </motion.p>

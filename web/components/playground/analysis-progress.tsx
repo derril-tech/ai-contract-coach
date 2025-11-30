@@ -74,7 +74,7 @@ export function AnalysisProgress({ status, message, progress, className }: Analy
             {/* Progress bar */}
             {progress.total > 0 && (
               <div className="mt-2">
-                <div className="flex justify-between text-[10px] text-text-muted mb-1">
+                <div className="flex justify-between text-[11px] text-text-muted mb-1">
                   <span>Clause {progress.current} of {progress.total}</span>
                   <span>{Math.round(progressPercent)}%</span>
                 </div>

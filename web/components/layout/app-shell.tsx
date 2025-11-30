@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Moon, SunMedium, LayoutDashboard, MessageSquare, FileText, Github, Linkedin, Heart } from "lucide-react";
+import { Moon, SunMedium, LayoutDashboard, MessageSquare, FileText, Github, Linkedin, Heart, Home } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,7 @@ interface AppShellProps {
 }
 
 const navItems = [
+  { href: "/", label: "Home", icon: Home, exact: true },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/playground", label: "Playground", icon: MessageSquare },
 ];
@@ -37,8 +38,8 @@ export function AppShell({ children }: AppShellProps) {
         </Link>
 
         <nav className="flex-1 space-y-1">
-          {navItems.map(({ href, label, icon: Icon }) => {
-            const active = pathname.startsWith(href);
+          {navItems.map(({ href, label, icon: Icon, exact }) => {
+            const active = exact ? pathname === href : pathname.startsWith(href);
             return (
               <Link
                 key={href}
@@ -66,7 +67,7 @@ export function AppShell({ children }: AppShellProps) {
                  </div>
                  <div className="flex flex-col overflow-hidden">
                     <span className="truncate text-xs font-medium">Derril Filemon</span>
-                    <span className="truncate text-[10px] text-text-muted">Pro Plan</span>
+                    <span className="truncate text-[11px] text-text-muted">Pro Plan</span>
                  </div>
               </div>
            </div>
@@ -147,19 +148,19 @@ export function AppShell({ children }: AppShellProps) {
         {/* Mobile Bottom Navigation */}
         <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border-subtle bg-bg-elevated/90 backdrop-blur-lg md:hidden pb-safe">
            <div className="flex items-center justify-around p-2">
-              {navItems.map(({ href, label, icon: Icon }) => {
-                 const active = pathname.startsWith(href);
+              {navItems.map(({ href, label, icon: Icon, exact }) => {
+                 const active = exact ? pathname === href : pathname.startsWith(href);
                  return (
                     <Link 
                        key={href} 
                        href={href}
                        className={cn(
-                          "flex flex-col items-center gap-1 rounded-lg px-4 py-2 transition-colors",
+                          "flex flex-col items-center gap-1 rounded-lg px-3 py-2 transition-colors",
                           active ? "text-primary" : "text-text-muted hover:text-text-secondary"
                        )}
                     >
                        <Icon className={cn("h-5 w-5", active && "fill-current/20")} />
-                       <span className="text-[10px] font-medium">{label}</span>
+                       <span className="text-[11px] font-medium">{label}</span>
                     </Link>
                  );
               })}

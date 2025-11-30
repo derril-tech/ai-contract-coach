@@ -137,7 +137,7 @@ export function Hero() {
                    <div className="flex flex-col gap-3">
                       <div className="flex items-center justify-between">
                          <span className="text-xs font-medium text-text-secondary">Termination for convenience</span>
-                         <Badge variant="outline" className="border-warning/40 text-[10px] text-warning bg-warning/5">
+                         <Badge variant="outline" className="border-warning/40 text-[11px] text-warning bg-warning/5">
                             Unbalanced
                          </Badge>
                       </div>

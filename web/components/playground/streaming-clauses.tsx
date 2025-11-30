@@ -145,7 +145,7 @@ export function StreamingClauses({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: index * 0.1 + 0.4 }}
-                        className="text-[10px] text-text-muted line-clamp-2 leading-relaxed"
+                        className="text-[11px] text-text-muted line-clamp-2 leading-relaxed"
                       >
                         {clause.summary}
                       </motion.p>

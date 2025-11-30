@@ -221,7 +221,7 @@ export function ShareButton({
                     <p className="text-xs font-medium text-text-primary">
                       {copied ? "Copied!" : "Copy Summary"}
                     </p>
-                    <p className="text-[10px] text-text-muted">Copy analysis to clipboard</p>
+                    <p className="text-[11px] text-text-muted">Copy analysis to clipboard</p>
                   </div>
                 </button>
 
@@ -233,7 +233,7 @@ export function ShareButton({
                   <Link2 className="h-4 w-4 text-text-muted" />
                   <div>
                     <p className="text-xs font-medium text-text-primary">Copy Link</p>
-                    <p className="text-[10px] text-text-muted">Share page URL</p>
+                    <p className="text-[11px] text-text-muted">Share page URL</p>
                   </div>
                 </button>
 
@@ -246,14 +246,14 @@ export function ShareButton({
                     className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 transition-colors"
                   >
                     <Twitter className="h-3.5 w-3.5 text-[#1DA1F2]" />
-                    <span className="text-[10px] font-medium text-[#1DA1F2]">Twitter</span>
+                    <span className="text-[11px] font-medium text-[#1DA1F2]">Twitter</span>
                   </button>
                   <button
                     onClick={shareToLinkedIn}
                     className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 transition-colors"
                   >
                     <Linkedin className="h-3.5 w-3.5 text-[#0A66C2]" />
-                    <span className="text-[10px] font-medium text-[#0A66C2]">LinkedIn</span>
+                    <span className="text-[11px] font-medium text-[#0A66C2]">LinkedIn</span>
                   </button>
                 </div>
 
@@ -265,7 +265,7 @@ export function ShareButton({
                   <Mail className="h-4 w-4 text-text-muted" />
                   <div>
                     <p className="text-xs font-medium text-text-primary">Email</p>
-                    <p className="text-[10px] text-text-muted">Send via email client</p>
+                    <p className="text-[11px] text-text-muted">Send via email client</p>
                   </div>
                 </button>
 
@@ -279,7 +279,7 @@ export function ShareButton({
                   <Download className="h-4 w-4 text-text-muted" />
                   <div>
                     <p className="text-xs font-medium text-text-primary">Download Report</p>
-                    <p className="text-[10px] text-text-muted">Save as Markdown file</p>
+                    <p className="text-[11px] text-text-muted">Save as Markdown file</p>
                   </div>
                 </button>
 
@@ -294,7 +294,7 @@ export function ShareButton({
                       <Share2 className="h-4 w-4 text-primary" />
                       <div>
                         <p className="text-xs font-medium text-primary">Share...</p>
-                        <p className="text-[10px] text-primary/70">Open system share menu</p>
+                        <p className="text-[11px] text-primary/70">Open system share menu</p>
                       </div>
                     </button>
                   </>

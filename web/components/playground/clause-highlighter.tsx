@@ -197,7 +197,7 @@ export function ClauseHighlighter({
       {/* Navigation controls */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border-subtle/50 shrink-0">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-text-muted">
+          <span className="text-[11px] text-text-muted">
             {highlightedSections.length} clauses highlighted
           </span>
         </div>

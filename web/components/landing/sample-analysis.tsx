@@ -11,7 +11,7 @@ export function SampleAnalysis() {
               <FileText className="h-4 w-4 text-secondary" />
               <CardTitle className="text-sm font-semibold">SaaS_Subscription_MSA.pdf</CardTitle>
            </div>
-           <Badge className="bg-accent/10 text-[10px] text-accent border border-accent/20 px-2 py-0.5">
+           <Badge className="bg-accent/10 text-[11px] text-accent border border-accent/20 px-2 py-0.5">
               Medium Risk
            </Badge>
         </div>
@@ -42,10 +42,10 @@ export function SampleAnalysis() {
         </div>
       </CardContent>
       <CardFooter className="justify-between border-t border-border-subtle/50 pt-3 bg-bg-subtle/30">
-        <Badge variant="outline" className="border-accent/40 text-[10px] text-accent bg-accent/5">
+        <Badge variant="outline" className="border-accent/40 text-[11px] text-accent bg-accent/5">
           5 risky clauses
         </Badge>
-        <div className="flex items-center gap-1 text-[10px] text-emerald-600">
+        <div className="flex items-center gap-1 text-[11px] text-emerald-600">
            <CheckCircle2 className="h-3 w-3" />
            <span>12 standard protections</span>
         </div>
