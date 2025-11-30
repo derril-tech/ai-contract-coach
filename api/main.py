@@ -236,6 +236,10 @@ async def process_contract_analysis(job_id: str, project_id: str, input_data: Ag
                 "updated_at": "now()"
             }).eq("id", job_id).execute()
 
+@app.get("/")
+async def root():
+    return {"message": "Welcome to ContractCoach API"}
+
 @app.get("/auth/google/url")
 async def google_auth_url():
     redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:3000/auth/google/callback")
