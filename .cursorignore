@@ -1,0 +1,16 @@
+# .cursorignore
+
+node_modules
+.env
+# .env.example is allowed
+.env.local
+.env.development
+.env.test
+.env.production
+.web-coverage
+web/.next
+web/out
+api/.venv
+api/__pycache__
+dist
+.next

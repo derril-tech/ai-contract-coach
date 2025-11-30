@@ -1,0 +1,182 @@
+
+---
+
+```md
+# .cursorrules
+
+# Cursor Rules — OpenAI ContractCoach
+
+## 🎯 Purpose
+Define architecture, stack, and conventions for all work in this repo.  
+Cursor must treat these as hard constraints when generating or editing code.
+
+---
+
+## 🧱 Tech Stack
+
+- **Frontend:** React 19.2 / Next.js 15 (App Router, TypeScript)
+- **Styling:** Tailwind CSS + shadcn/ui
+- **Backend:** FastAPI (Python 3.11+)
+- **Database:** Supabase (schema: `contractcoach`)
+- **Cache/Queue:** Upstash Redis (prefix: `contractcoach`)
+- **AI Framework:** OpenAI SDK (o3 / gpt-4.1, structured outputs)
+- **External API:** Google Drive API (OAuth 2.0)
+
+---
+
+## 📂 Folder Structure
+
+- `/web` — Next.js frontend
+  - `/web/app` — App Router routes (`/`, `/dashboard`, `/playground`)
+  - `/web/hooks/useAgent.ts` — shared hook for `/agent/run` + `/jobs/{id}`
+  - `/components` — shared UI (AppShell, cards, playground, etc.)
+- `/api` — FastAPI backend
+  - `/api/main.py` — FastAPI app with required endpoints
+- `/db` — Supabase schema migrations (`000-init.sql`)
+- Root spec files: `PROJECT_BRIEF.md`, `ARCH.md`, `PLAN.md`, `TODO.md`, `BOOTSTRAP.md`
+
+---
+
+## 🧩 Required Backend Endpoints
+
+Cursor must ensure these exist and keep their contracts:
+
+| Method | Path              | Purpose                                               |
+|--------|-------------------|-------------------------------------------------------|
+| POST   | `/agent/run`      | Accept `{ projectId, input }`, trigger adapter run   |
+| GET    | `/jobs/{id}`      | Poll job state/result                                |
+| GET    | `/messages`       | `?projectId=...` → message history from Supabase     |
+
+Optional:
+
+| Method | Path             | Purpose                                         |
+|--------|------------------|-------------------------------------------------|
+| POST   | `/tools/{name}`  | Framework-specific external tools if needed    |
+
+---
+
+## 🪣 Persistence Rules
+
+- Supabase tables (schema `contractcoach`):
+  - `profiles`, `projects`, `messages`, `jobs`
+- Redis keys (prefix `contractcoach`):
+  - `contractcoach:job:{id}` — job state/result
+  - `contractcoach:rate:{bucket}` — rate limit buckets (TTL ≈ 60s)
+  - `contractcoach:cache:*` — transient external API results (Drive, etc.)
+
+---
+
+## 🧭 Frontend Routing
+
+Required pages:
+
+- `/` – Marketing landing, hero video background, CTA to playground.
+- `/dashboard` – Recent contracts, risk overview.
+- `/playground` – Contract review UI (contract info + clauses + AI Q&A).
+
+Use `useAgent(projectId)` for all agent interactions (POST + polling).
+
+---
+
+# === THEME COMPLIANCE RULES ===
+# These rules apply to EVERY change involving UI, components, styling, layouts,
+# Tailwind, CSS Modules, styled-components, shadcn/ui, or design tokens.
+
+# 1. ALWAYS load and follow .cursor/Theming.md
+When making any UI or styling modification, you MUST read and follow
+`.cursor/Theming.md`. It defines the single source of truth for
+light/dark theming behavior in this project.
+
+# 2. NO raw colors unless explicitly allowed
+- Do NOT introduce or leave behind raw hex/rgb values in JSX, CSS, or Tailwind.
+- Always use semantic tokens or CSS variables (bg-background, text-foreground,
+  bg-card, text-muted-foreground, border-border, etc.).
+- If raw colors already exist, prefer refactoring them to semantic tokens.
+
+# 3. Maintain the single source of theming truth
+- DO NOT introduce new theme providers, contexts, toggles, or theme state.
+- Always reuse the existing ThemeProvider or next-themes setup.
+- NEVER switch between data-theme and class="dark" systems.
+- NEVER add a second theme system (e.g. adding Chakra UI theming to a Tailwind system).
+
+# 4. Preserve theming wrappers when editing layouts
+- Do NOT remove or simplify containers that define theme context
+  (bg-background, text-foreground, dark: classes, etc.).
+- When refactoring layouts/pages/components, retain or reapply the same
+  background, text, and wrapper theme classes.
+
+# 5. All new components must be theme-safe by default
+When generating new components:
+- Use bg-background and text-foreground as base colors.
+- Use card and muted tokens for cards and subtle UI sections.
+- Icons must use currentColor.
+- SVG fills/strokes must not be hard-coded unless tokens require it.
+
+# 6. All edits must preserve correct light/dark appearance
+Any change that might affect visuals must:
+- Look correct in light mode
+- Look correct in dark mode
+- Use tokens for both
+If uncertain, assume the theme will break and FIX IT preemptively.
+
+# 7. No duplicating components per theme
+Do NOT create separate LightComponent and DarkComponent variants.
+All theming must route through tokens, variants, or a tiny switch for images only.
+
+# 8. Respect hydration safety
+- DO NOT use window/document/matchMedia for theme in server components.
+- Keep suppressHydrationWarning on <html> intact.
+- Keep attribute="class" and darkMode:"class" intact if Tailwind is used.
+
+# 9. Before finalizing ANY UI work, run the Theming Checklist
+Always follow the checklist in `.cursor/Theming.md`:
+- Tokens used?
+- Contrast ok?
+- Background/text correct?
+- Theme wrappers preserved?
+- No raw colors?
+- No second theme system created?
+Fix issues BEFORE completing changes.
+
+# === END THEME COMPLIANCE RULES ===
+
+
+---
+
+## 🔐 Environment Variables (must match `.env.example`)
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `OPENAI_API_KEY`
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+- `SUPABASE_SERVICE_ROLE`
+- `SUPABASE_SCHEMA`
+- `REDIS_PREFIX`
+- `RAILWAY_PUBLIC_DOMAIN`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `GOOGLE_REDIRECT_URI`
+
+Secrets must **never** be hardcoded.
+
+---
+
+## ⚙️ Conventions
+
+- TypeScript only in `/web` (no plain JS).
+- Prefer async functions for I/O.
+- Keep components small/composable.
+- Use semantic tokens (`bg-bg-page`, `text-text-primary`, etc.) tied to CSS vars.
+- Add minimal docstrings where behavior is non-obvious.
+
+---
+
+## 🚀 Success Definition
+
+The project is considered bootstrapped correctly when:
+
+- All three routes (`/`, `/dashboard`, `/playground`) render without errors.
+- `/agent/run` → `/jobs/{id}` completes a round trip with a dummy analysis.
+- Supabase + Redis env vars are wired and reachable (at least via health checks).
+- README and deployment notes exist and align with PROJECT_BRIEF.

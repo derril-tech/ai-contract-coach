@@ -1,0 +1,12 @@
+# .cursorignore-largefiles
+
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp4
+*.mov
+*.webm
+/public/demo/*
+/.next
+/dist
