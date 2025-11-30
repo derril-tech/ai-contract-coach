@@ -30,6 +30,10 @@ import { ClauseHighlighter } from "@/components/playground/clause-highlighter";
 import { VoiceInput } from "@/components/playground/voice-input";
 import { ShareButton, QuickCopyButton } from "@/components/playground/share-button";
 import { NegotiationTips } from "@/components/playground/negotiation-tips";
+import { PdfExportButton } from "@/components/export/pdf-export";
+import { EmailSummaryButton } from "@/components/export/email-summary";
+import { BatchUploadButton, BatchAnalysis } from "@/components/playground/batch-analysis";
+import { SettingsButton, SettingsPanel } from "@/components/settings/settings-panel";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Sample contract for demo
@@ -60,6 +64,8 @@ export default function PlaygroundPage() {
   const [question, setQuestion] = useState("");
   const [contractText, setContractText] = useState("");
   const [showContractInput, setShowContractInput] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showBatchMode, setShowBatchMode] = useState(false);
   
   // Streaming hook for real-time analysis
   const {
@@ -158,6 +164,7 @@ export default function PlaygroundPage() {
                   </p>
                 </div>
                 <div className="flex gap-2">
+                  <BatchUploadButton onClick={() => setShowBatchMode(true)} />
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -176,6 +183,7 @@ export default function PlaygroundPage() {
                     <Zap className="mr-2 h-3 w-3" />
                     Demo
                   </Button>
+                  <SettingsButton onClick={() => setShowSettings(true)} />
                 </div>
               </CardHeader>
               
@@ -299,8 +307,20 @@ export default function PlaygroundPage() {
                   transition={{ duration: 0.3 }}
                 >
                   <div className="relative">
-                    {/* Share button in top right */}
-                    <div className="absolute top-3 right-3 z-10">
+                    {/* Action buttons in top right */}
+                    <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+                      <PdfExportButton
+                        contractName="Contract Analysis"
+                        risk={overallRisk}
+                        clauses={clauses}
+                        summary={summary}
+                      />
+                      <EmailSummaryButton
+                        contractName="Contract Analysis"
+                        risk={overallRisk}
+                        clauses={clauses}
+                        summary={summary}
+                      />
                       <ShareButton
                         risk={overallRisk}
                         clauses={clauses}
@@ -550,6 +570,44 @@ export default function PlaygroundPage() {
           </div>
         </div>
       </div>
+
+      {/* Settings Panel */}
+      <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
+
+      {/* Batch Analysis Modal */}
+      <AnimatePresence>
+        {showBatchMode && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-40"
+              onClick={() => setShowBatchMode(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed inset-4 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg z-50"
+            >
+              <BatchAnalysis
+                onAnalyze={async (text) => ({
+                  risk: "medium" as const,
+                  clauseCount: 5,
+                  summary: "Analysis complete",
+                })}
+              />
+              <button
+                onClick={() => setShowBatchMode(false)}
+                className="absolute -top-2 -right-2 p-2 rounded-full bg-bg-elevated border border-border-subtle shadow-lg text-text-muted hover:text-text-primary"
+              >
+                ×
+              </button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </AppShell>
   );
 }

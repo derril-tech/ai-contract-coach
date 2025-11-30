@@ -9,6 +9,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
 import { RiskDonut } from "@/components/playground/risk-donut";
 import { RiskBar } from "@/components/playground/risk-summary-card";
+import { ContractHistory } from "@/components/dashboard/contract-history";
 import { motion } from "framer-motion";
 
 const mockContracts = [
@@ -222,6 +223,9 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Contract History */}
+            <ContractHistory className="col-span-full" />
           </div>
         </div>
       </div>
