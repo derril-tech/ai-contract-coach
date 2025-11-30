@@ -29,6 +29,7 @@ import { RiskSummaryCard } from "@/components/playground/risk-summary-card";
 import { ClauseHighlighter } from "@/components/playground/clause-highlighter";
 import { VoiceInput } from "@/components/playground/voice-input";
 import { ShareButton, QuickCopyButton } from "@/components/playground/share-button";
+import { NegotiationTips } from "@/components/playground/negotiation-tips";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Sample contract for demo
@@ -428,6 +429,20 @@ export default function PlaygroundPage() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Negotiation Tips Card */}
+            <AnimatePresence>
+              {selectedClause && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <NegotiationTips clause={selectedClause} />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Chat Card */}
             <Card className="border-border-subtle/80 bg-bg-elevated shadow-sm flex-1 flex flex-col min-h-0 overflow-hidden">

@@ -200,3 +200,102 @@ Return 3-8 key clauses depending on the contract length."""
         logger.error(f"Streaming analysis failed: {e}")
         yield {"type": "error", "data": {"error": str(e)}}
 
+
+# ============================================================================
+# NEGOTIATION TIPS GENERATION
+# ============================================================================
+
+class NegotiationTip(BaseModel):
+    id: str = Field(description="Unique UUID for the tip")
+    category: str = Field(description="Category: soften, protect, counter, or remove")
+    title: str = Field(description="Short title for the tip")
+    originalText: str = Field(description="The original clause text being addressed")
+    suggestedText: str = Field(description="Suggested alternative wording")
+    strategy: str = Field(description="Explanation of the negotiation strategy")
+    confidence: float = Field(description="Confidence score from 0.0 to 1.0")
+
+class NegotiationTipsResponse(BaseModel):
+    tips: List[NegotiationTip] = Field(description="List of negotiation tips for the clause")
+
+
+async def generate_negotiation_tips(
+    clause_text: str,
+    clause_type: str,
+    risk_level: str,
+    clause_title: str = "",
+    context: str = ""
+) -> Dict[str, Any]:
+    """
+    Generates smart negotiation tips for a specific clause using OpenAI.
+    
+    Args:
+        clause_text: The original clause text
+        clause_type: Type of clause (payment, ip, confidentiality, termination, liability)
+        risk_level: Risk level (low, medium, high)
+        clause_title: Optional title of the clause
+        context: Optional additional context
+    
+    Returns:
+        Dictionary with 'tips' array containing negotiation suggestions
+    """
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        logger.warning("OPENAI_API_KEY not found. Returning empty tips.")
+        return {"tips": [], "error": "Missing OpenAI API Key"}
+
+    client = AsyncOpenAI(api_key=api_key)
+    
+    system_prompt = """You are an expert contract negotiation advisor. Your role is to provide 
+actionable negotiation tips to help the user improve their position in contract negotiations.
+
+For each clause, generate 2-4 specific negotiation tips that:
+1. SOFTEN - Make harsh language more balanced
+2. PROTECT - Add protections for the reviewing party
+3. COUNTER - Propose alternative terms that are more favorable
+4. REMOVE - Suggest removing problematic provisions entirely (only for high-risk clauses)
+
+Each tip should include:
+- A clear category (soften, protect, counter, remove)
+- A descriptive title
+- The exact suggested alternative wording
+- A brief strategy explanation
+- A confidence score (0.0-1.0) based on how likely the change would be accepted
+
+Be specific and practical. Provide actual language, not just concepts."""
+
+    user_prompt = f"""Generate negotiation tips for this {risk_level.upper()} RISK {clause_type.upper()} clause:
+
+Clause Title: {clause_title or 'N/A'}
+Original Text:
+"{clause_text}"
+
+{f'Additional Context: {context}' if context else ''}
+
+Provide 2-4 specific, actionable tips with alternative wording."""
+
+    try:
+        completion = await client.beta.chat.completions.parse(
+            model="gpt-4o-2024-08-06",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            response_format=NegotiationTipsResponse,
+        )
+        
+        result = completion.choices[0].message.parsed
+        
+        if result:
+            tips_data = result.model_dump()
+            # Ensure each tip has an ID
+            for tip in tips_data.get("tips", []):
+                if not tip.get("id"):
+                    tip["id"] = str(uuid.uuid4())
+            return tips_data
+        else:
+            return {"tips": [], "error": "No tips generated"}
+            
+    except Exception as e:
+        logger.error(f"Failed to generate negotiation tips: {e}")
+        return {"tips": [], "error": str(e)}
+

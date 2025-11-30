@@ -35,7 +35,7 @@ except ImportError:
 
 # External Integrations
 try:
-    from api.openai_adapter import analyze_contract, analyze_contract_stream
+    from api.openai_adapter import analyze_contract, analyze_contract_stream, generate_negotiation_tips
     from api.google_drive_client import (
         get_auth_url, 
         exchange_code_for_tokens, 
@@ -45,7 +45,7 @@ try:
     from api.streaming import format_sse_event, StreamingEventTypes
 except ImportError:
     # Fallback for Railway if running from root without 'api' package awareness
-    from openai_adapter import analyze_contract, analyze_contract_stream
+    from openai_adapter import analyze_contract, analyze_contract_stream, generate_negotiation_tips
     from google_drive_client import (
         get_auth_url, 
         exchange_code_for_tokens, 
@@ -656,3 +656,59 @@ async def run_agent_stream(body: RunBody, request: Request):
                 "X-Accel-Buffering": "no",
             }
         )
+
+
+# =============================================================================
+# NEGOTIATION TIPS ENDPOINT
+# =============================================================================
+
+class NegotiationTipsRequest(BaseModel):
+    clauseText: str
+    clauseType: str
+    riskLevel: str
+    clauseTitle: Optional[str] = None
+    context: Optional[str] = None
+
+
+@app.post("/negotiate/tips")
+async def get_negotiation_tips(body: NegotiationTipsRequest):
+    """
+    Generate smart negotiation tips for a specific clause.
+    Returns AI-powered suggestions for improving contract terms.
+    """
+    try:
+        # Optional: Check cache first
+        cache_key = None
+        if redis:
+            import hashlib
+            clause_hash = hashlib.md5(body.clauseText.encode()).hexdigest()[:16]
+            cache_key = f"{PREFIX}:tips:{clause_hash}"
+            cached = redis.get(cache_key)
+            if cached:
+                try:
+                    return json.loads(cached)
+                except:
+                    pass
+        
+        # Generate tips using OpenAI
+        result = await generate_negotiation_tips(
+            clause_text=body.clauseText,
+            clause_type=body.clauseType,
+            risk_level=body.riskLevel,
+            clause_title=body.clauseTitle or "",
+            context=body.context or ""
+        )
+        
+        # Cache the result for 1 hour
+        if redis and cache_key and result.get("tips"):
+            try:
+                redis.set(cache_key, json.dumps(result), ex=3600)
+            except Exception as e:
+                print(f"Failed to cache tips: {e}")
+        
+        return result
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to generate tips: {str(e)}")
