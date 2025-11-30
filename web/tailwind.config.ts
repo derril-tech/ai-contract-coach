@@ -23,10 +23,43 @@ const config: Config = {
         "text-secondary": "var(--text-secondary)",
         "text-muted": "var(--text-muted)",
 
-        primary: "var(--color-primary)",
-        secondary: "var(--color-secondary)",
-        accent: "var(--color-accent)",
+        // Re-map shadcn tokens to use our CSS variables properly
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        
+        card: {
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)",
+        },
+        popover: {
+          DEFAULT: "var(--popover)",
+          foreground: "var(--popover-foreground)",
+        },
+        primary: {
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
+        },
+        secondary: {
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
+        },
+        muted: {
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
+        },
+        destructive: {
+          DEFAULT: "var(--color-danger)", // Mapping directly to our danger token
+          foreground: "var(--text-on-primary)",
+        },
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
 
+        // Keep legacy direct access if needed
         success: "var(--color-success)",
         warning: "var(--color-warning)",
         danger: "var(--color-danger)",
@@ -46,4 +79,3 @@ const config: Config = {
 };
 
 export default config;
-
