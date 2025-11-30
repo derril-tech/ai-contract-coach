@@ -14,13 +14,23 @@ from supabase import create_client, Client
 from upstash_redis import Redis
 
 # External Integrations
-from api.openai_adapter import analyze_contract
-from api.google_drive_client import (
-    get_auth_url, 
-    exchange_code_for_tokens, 
-    download_file_content,
-    fetch_file_metadata
-)
+try:
+    from api.openai_adapter import analyze_contract
+    from api.google_drive_client import (
+        get_auth_url, 
+        exchange_code_for_tokens, 
+        download_file_content,
+        fetch_file_metadata
+    )
+except ImportError:
+    # Fallback for Railway if running from root without 'api' package awareness
+    from openai_adapter import analyze_contract
+    from google_drive_client import (
+        get_auth_url, 
+        exchange_code_for_tokens, 
+        download_file_content,
+        fetch_file_metadata
+    )
 
 # Text Extraction
 try:
