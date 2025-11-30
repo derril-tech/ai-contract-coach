@@ -240,6 +240,47 @@ async def process_contract_analysis(job_id: str, project_id: str, input_data: Ag
 async def root():
     return {"message": "Welcome to ContractCoach API"}
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint to verify all service connections"""
+    health = {
+        "status": "healthy",
+        "services": {}
+    }
+    
+    # Check Redis
+    try:
+        if redis:
+            await redis.ping()
+            health["services"]["redis"] = "connected"
+        else:
+            health["services"]["redis"] = "not_configured"
+    except Exception as e:
+        health["services"]["redis"] = f"error: {str(e)}"
+        health["status"] = "degraded"
+    
+    # Check Supabase
+    try:
+        if supabase:
+            # Simple query to test connection
+            supabase.table("contractcoach.profiles").select("id").limit(1).execute()
+            health["services"]["supabase"] = "connected"
+        else:
+            health["services"]["supabase"] = "not_configured"
+    except Exception as e:
+        health["services"]["supabase"] = f"error: {str(e)}"
+        health["status"] = "degraded"
+    
+    # Check OpenAI (just verify key exists, don't make a call)
+    openai_key = os.getenv("OPENAI_API_KEY")
+    if openai_key:
+        health["services"]["openai"] = "configured"
+    else:
+        health["services"]["openai"] = "not_configured"
+        health["status"] = "degraded"
+    
+    return health
+
 @app.get("/auth/google/url")
 async def google_auth_url():
     redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:3000/auth/google/callback")
