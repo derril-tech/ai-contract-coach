@@ -1,7 +1,8 @@
 import os
 import json
 import logging
-from typing import Dict, Any, List, Optional
+import uuid
+from typing import Dict, Any, List, Optional, AsyncGenerator
 from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
@@ -64,4 +65,138 @@ async def analyze_contract(text: str, options: Dict[str, Any] = None) -> Dict[st
     except Exception as e:
         logger.error(f"OpenAI analysis failed: {e}")
         raise e
+
+
+async def analyze_contract_stream(
+    text: str, 
+    options: Dict[str, Any] = None
+) -> AsyncGenerator[Dict[str, Any], None]:
+    """
+    Streams contract analysis results clause-by-clause using OpenAI.
+    
+    Yields events:
+    - {"type": "status", "data": {"status": "starting"}}
+    - {"type": "progress", "data": {"current": 1, "total": 5, "message": "..."}}
+    - {"type": "clause", "data": {clause_object}}
+    - {"type": "summary", "data": {"overallRisk": "...", "summary": "..."}}
+    - {"type": "complete", "data": {"status": "done"}}
+    """
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        yield {"type": "error", "data": {"error": "Missing OpenAI API Key"}}
+        return
+
+    client = AsyncOpenAI(api_key=api_key)
+    
+    # Yield starting status
+    yield {"type": "status", "data": {"status": "starting", "message": "Initializing analysis..."}}
+    
+    system_prompt = """You are an expert contract lawyer and AI assistant.
+Your job is to review contracts, identify key clauses, assess their risk, and explain them in plain English.
+
+IMPORTANT: You must respond with ONLY a valid JSON object, no other text.
+
+The JSON must have this exact structure:
+{
+    "overallRisk": "low" | "medium" | "high",
+    "summary": "Executive summary of the contract",
+    "clauses": [
+        {
+            "type": "payment" | "ip" | "confidentiality" | "termination" | "liability" | "other",
+            "title": "Short title",
+            "risk": "low" | "medium" | "high",
+            "originalText": "Exact text from contract",
+            "summary": "Plain English explanation",
+            "whyItMatters": "Why this is important",
+            "suggestedEdit": "Suggested improvement or null"
+        }
+    ]
+}
+
+Focus on identifying clauses related to: Payment, IP, Confidentiality, Termination, and Liability.
+Return 3-8 key clauses depending on the contract length."""
+
+    user_prompt = f"Analyze this contract and return ONLY the JSON response:\n\n{text[:50000]}"
+    
+    if options and options.get("questions"):
+        user_prompt += f"\n\nIncorporate answers to these questions in your summary: {', '.join(options['questions'])}"
+    
+    yield {"type": "status", "data": {"status": "analyzing", "message": "Analyzing contract with AI..."}}
+    
+    try:
+        # Use streaming to get the response progressively
+        full_response = ""
+        
+        stream = await client.chat.completions.create(
+            model="gpt-4o-2024-08-06",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            stream=True,
+            temperature=0.3,  # More deterministic for structured output
+        )
+        
+        yield {"type": "status", "data": {"status": "streaming", "message": "Receiving analysis..."}}
+        
+        async for chunk in stream:
+            if chunk.choices[0].delta.content:
+                full_response += chunk.choices[0].delta.content
+        
+        # Parse the complete JSON response
+        yield {"type": "status", "data": {"status": "parsing", "message": "Processing results..."}}
+        
+        # Clean up response (remove markdown code blocks if present)
+        clean_response = full_response.strip()
+        if clean_response.startswith("```json"):
+            clean_response = clean_response[7:]
+        if clean_response.startswith("```"):
+            clean_response = clean_response[3:]
+        if clean_response.endswith("```"):
+            clean_response = clean_response[:-3]
+        clean_response = clean_response.strip()
+        
+        try:
+            result = json.loads(clean_response)
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON parse error: {e}")
+            logger.error(f"Response was: {clean_response[:500]}")
+            yield {"type": "error", "data": {"error": f"Failed to parse AI response: {str(e)}"}}
+            return
+        
+        clauses = result.get("clauses", [])
+        total_clauses = len(clauses)
+        
+        # Stream each clause with a small delay for visual effect
+        for i, clause in enumerate(clauses):
+            # Add unique ID if not present
+            if "id" not in clause:
+                clause["id"] = str(uuid.uuid4())
+            
+            yield {
+                "type": "progress", 
+                "data": {
+                    "current": i + 1, 
+                    "total": total_clauses,
+                    "message": f"Analyzing {clause.get('title', 'clause')}..."
+                }
+            }
+            
+            yield {"type": "clause", "data": clause}
+        
+        # Send final summary
+        yield {
+            "type": "summary", 
+            "data": {
+                "overallRisk": result.get("overallRisk", "medium"),
+                "summary": result.get("summary", "Analysis complete."),
+                "totalClauses": total_clauses
+            }
+        }
+        
+        yield {"type": "complete", "data": {"status": "done"}}
+        
+    except Exception as e:
+        logger.error(f"Streaming analysis failed: {e}")
+        yield {"type": "error", "data": {"error": str(e)}}
 

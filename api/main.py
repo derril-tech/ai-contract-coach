@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import os
 import uuid
@@ -34,22 +35,24 @@ except ImportError:
 
 # External Integrations
 try:
-    from api.openai_adapter import analyze_contract
+    from api.openai_adapter import analyze_contract, analyze_contract_stream
     from api.google_drive_client import (
         get_auth_url, 
         exchange_code_for_tokens, 
         download_file_content,
         fetch_file_metadata
     )
+    from api.streaming import format_sse_event, StreamingEventTypes
 except ImportError:
     # Fallback for Railway if running from root without 'api' package awareness
-    from openai_adapter import analyze_contract
+    from openai_adapter import analyze_contract, analyze_contract_stream
     from google_drive_client import (
         get_auth_url, 
         exchange_code_for_tokens, 
         download_file_content,
         fetch_file_metadata
     )
+    from streaming import format_sse_event, StreamingEventTypes
 
 # Text Extraction
 try:
@@ -447,3 +450,209 @@ async def get_messages(projectId: str = Query(..., alias="projectId")):
         return {"items": items}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================
+# STREAMING ENDPOINT - Real-time Analysis
+# ============================================
+
+@app.post("/agent/run/stream")
+async def run_agent_stream(body: RunBody, request: Request):
+    """
+    Stream contract analysis results in real-time using Server-Sent Events (SSE).
+    
+    Returns a stream of events:
+    - status: Analysis progress updates
+    - clause: Individual clause analysis results
+    - summary: Final summary and overall risk
+    - complete: Analysis finished
+    - error: If something goes wrong
+    """
+    try:
+        # Rate Limiting (per IP) - same as regular endpoint
+        client_ip = "unknown"
+        if request.client:
+            client_ip = request.client.host
+        
+        rate_key = f"{PREFIX}:rate:{client_ip}"
+        
+        if redis:
+            try:
+                allowed = check_rate_limit(rate_key, limit=5, window=60)
+                if not allowed:
+                    async def rate_limit_error():
+                        yield format_sse_event("error", {"error": "Rate limit exceeded"})
+                    return StreamingResponse(
+                        rate_limit_error(),
+                        media_type="text/event-stream",
+                        headers={
+                            "Cache-Control": "no-cache",
+                            "Connection": "keep-alive",
+                            "X-Accel-Buffering": "no",
+                        }
+                    )
+            except Exception as e:
+                print(f"Rate limit check failed: {e}")
+        
+        # Resolve text from input
+        text_to_analyze = body.input.text
+        
+        if body.input.driveFileId:
+            if not body.input.accessToken:
+                async def token_error():
+                    yield format_sse_event("error", {"error": "Drive File ID provided but no access token"})
+                return StreamingResponse(
+                    token_error(),
+                    media_type="text/event-stream",
+                    headers={
+                        "Cache-Control": "no-cache",
+                        "Connection": "keep-alive",
+                        "X-Accel-Buffering": "no",
+                    }
+                )
+            
+            # Check Redis cache first
+            cache_key = f"{PREFIX}:cache:drive:file:{body.input.driveFileId}"
+            cached_text = None
+            if redis:
+                cached_text = redis.get(cache_key)
+            
+            if cached_text:
+                text_to_analyze = cached_text
+            else:
+                # Fetch from Drive
+                meta = fetch_file_metadata(body.input.driveFileId, body.input.accessToken)
+                mime_type = meta.get('mimeType')
+                content_bytes = download_file_content(body.input.driveFileId, body.input.accessToken)
+                text_to_analyze = extract_text_from_bytes(content_bytes, mime_type)
+                
+                # Cache the extracted text
+                if redis and text_to_analyze:
+                    redis.set(cache_key, text_to_analyze, ex=1800)
+        
+        if not text_to_analyze:
+            async def no_text_error():
+                yield format_sse_event("error", {"error": "No text provided or extracted"})
+            return StreamingResponse(
+                no_text_error(),
+                media_type="text/event-stream",
+                headers={
+                    "Cache-Control": "no-cache",
+                    "Connection": "keep-alive",
+                    "X-Accel-Buffering": "no",
+                }
+            )
+        
+        # Create job ID for tracking
+        job_id = str(uuid.uuid4())
+        
+        async def generate_stream():
+            """Generator that yields SSE events."""
+            collected_clauses = []
+            final_summary = None
+            overall_risk = "medium"
+            
+            try:
+                # Yield initial job info
+                yield format_sse_event("job", {"jobId": job_id, "projectId": body.projectId})
+                
+                # Stream analysis from OpenAI
+                async for event in analyze_contract_stream(
+                    text_to_analyze, 
+                    {"questions": body.input.questions}
+                ):
+                    event_type = event.get("type", "message")
+                    event_data = event.get("data", {})
+                    
+                    # Forward the event to the client
+                    yield format_sse_event(event_type, event_data)
+                    
+                    # Collect clauses for saving
+                    if event_type == "clause":
+                        collected_clauses.append(event_data)
+                    elif event_type == "summary":
+                        final_summary = event_data.get("summary")
+                        overall_risk = event_data.get("overallRisk", "medium")
+                    
+                    # Small delay between clause events for visual effect
+                    if event_type == "clause":
+                        await asyncio.sleep(0.3)
+                
+                # Save results to database after streaming completes
+                try:
+                    # Create job record
+                    result_data = {
+                        "overallRisk": overall_risk,
+                        "summary": final_summary or "Analysis complete.",
+                        "clauses": collected_clauses
+                    }
+                    
+                    db_job = {
+                        "id": job_id,
+                        "project_id": body.projectId,
+                        "kind": "contract_review",
+                        "status": "done",
+                        "payload": json.dumps(body.input.model_dump(exclude={"accessToken"})),
+                        "result": json.dumps(result_data)
+                    }
+                    execute_insert("jobs", db_job)
+                    
+                    # Save messages
+                    user_msg = {
+                        "project_id": body.projectId,
+                        "role": "user",
+                        "content": "(streaming analysis)",
+                        "meta": json.dumps({"jobId": job_id, "streaming": True})
+                    }
+                    execute_insert("messages", user_msg)
+                    
+                    assistant_msg = {
+                        "project_id": body.projectId,
+                        "role": "assistant",
+                        "content": final_summary or "Analysis complete.",
+                        "meta": json.dumps({"jobId": job_id, "risk": overall_risk, "clauseCount": len(collected_clauses)})
+                    }
+                    execute_insert("messages", assistant_msg)
+                    
+                    # Cache in Redis
+                    if redis:
+                        redis.set(f"{PREFIX}:job:{job_id}", json.dumps({
+                            "id": job_id,
+                            "status": "done",
+                            "result": result_data
+                        }))
+                    
+                except Exception as save_error:
+                    print(f"Failed to save streaming results: {save_error}")
+                    # Don't fail the stream, just log it
+                
+            except Exception as e:
+                print(f"Streaming error: {e}")
+                yield format_sse_event("error", {"error": str(e)})
+        
+        return StreamingResponse(
+            generate_stream(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",  # Disable nginx buffering
+            }
+        )
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        
+        async def error_stream():
+            yield format_sse_event("error", {"error": str(e)})
+        
+        return StreamingResponse(
+            error_stream(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            }
+        )
