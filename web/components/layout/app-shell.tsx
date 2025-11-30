@@ -114,7 +114,17 @@ export function AppShell({ children }: AppShellProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button variant="default" size="sm" asChild className="hidden sm:inline-flex bg-primary hover:bg-primary/90 shadow-soft transition-all hover:translate-y-[-1px]">
+             {/* Desktop Theme Toggle (added) */}
+            <button
+              type="button"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="hidden sm:inline-flex rounded-full p-2 text-text-secondary hover:bg-bg-subtle hover:text-text-primary transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? <SunMedium className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+
+            <Button variant="default" size="sm" asChild className="hidden sm:inline-flex bg-primary text-white hover:bg-primary/90 shadow-soft transition-all hover:translate-y-[-1px]">
               <Link href="/playground">
                  <MessageSquare className="mr-2 h-3 w-3" />
                  New Review
@@ -161,4 +171,3 @@ export function AppShell({ children }: AppShellProps) {
     </div>
   );
 }
-

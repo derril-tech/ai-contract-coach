@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-bg-page font-sans antialiased", inter.variable, jetbrainsMono.variable)}>
-        <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem disableTransitionOnChange>
           {children}
         </ThemeProvider>
       </body>

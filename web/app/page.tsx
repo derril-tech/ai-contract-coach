@@ -1,25 +1,40 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, UploadCloud, Sparkles } from "lucide-react";
+import { ArrowRight, UploadCloud, Sparkles, Moon, SunMedium } from "lucide-react";
 import { Hero } from "@/components/landing/hero";
 import { FeatureGrid } from "@/components/landing/feature-grid";
 import { Steps } from "@/components/landing/steps";
 import { SampleAnalysis } from "@/components/landing/sample-analysis";
 import { LandingFooter } from "@/components/landing/footer";
 import { Badge } from "@/components/ui/badge";
+import { useTheme } from "next-themes";
 
 export default function LandingPage() {
+  const { theme, setTheme } = useTheme();
+  
   return (
     <main className="min-h-screen bg-bg-page text-text-primary flex flex-col">
       <div className="sticky top-0 z-50 w-full border-b border-border-subtle bg-bg-page/80 backdrop-blur-md supports-[backdrop-filter]:bg-bg-page/60">
          <div className="container flex h-14 items-center justify-between px-6 md:px-12 mx-auto max-w-7xl">
-            <div className="flex items-center gap-2 font-bold text-lg tracking-tight">
+            <Link href="/" className="flex items-center gap-2 font-bold text-lg tracking-tight">
+               <div className="relative h-8 w-8">
+                 <Image src="/logo.png" alt="ContractCoach Logo" fill className="object-contain" />
+               </div>
                <span className="text-primary">ContractCoach</span>
-            </div>
+            </Link>
             <div className="flex items-center gap-4">
-               <Link href="/dashboard" className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
+               <button
+                type="button"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="rounded-full p-2 text-text-secondary hover:bg-bg-subtle hover:text-text-primary transition-colors"
+                aria-label="Toggle theme"
+               >
+                {theme === "dark" ? <SunMedium className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+               </button>
+               <Link href="/dashboard" className="text-sm font-medium text-text-secondary hover:text-primary transition-colors hidden sm:inline-block">
                   Sign In
                </Link>
                <Button size="sm" className="bg-primary text-white hover:bg-primary/90 shadow-sm" asChild>
@@ -66,7 +81,7 @@ export default function LandingPage() {
               English, and suggests negotiation points.
             </p>
             <div className="flex flex-wrap gap-4 pt-2">
-              <Button asChild size="lg" className="bg-primary hover:bg-primary/90 shadow-soft">
+              <Button asChild size="lg" className="bg-primary text-white hover:bg-primary/90 shadow-soft">
                 <Link href="/playground">
                   Explore sample analysis
                   <ArrowRight className="ml-2 h-4 w-4" />
