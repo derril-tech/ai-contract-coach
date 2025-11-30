@@ -24,10 +24,10 @@
 |---|---------|----------|--------|----------------|-------------|--------|
 | 1 | Real-time Streaming Analysis | 🔴 Critical | Medium | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ✅ Complete |
 | 2 | Interactive Risk Visualization | 🔴 Critical | Low | ⭐⭐⭐⭐ | ⭐⭐⭐ | ✅ Complete |
-| 3 | Live Clause Highlighter | 🟡 High | Low | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | 🔜 Next |
-| 4 | Voice Question Input | 🟡 High | Low | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⏸️ Pending |
-| 5 | One-Click Summary Share | 🟡 High | Low | ⭐⭐⭐ | ⭐⭐ | ⏸️ Pending |
-| 6 | Smart Negotiation Tips | 🟡 High | Medium | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⏸️ Pending |
+| 3 | Live Clause Highlighter | 🟡 High | Low | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ✅ Complete |
+| 4 | Voice Question Input | 🟡 High | Low | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ✅ Complete |
+| 5 | One-Click Summary Share | 🟡 High | Low | ⭐⭐⭐ | ⭐⭐ | ✅ Complete |
+| 6 | Smart Negotiation Tips | 🟡 High | Medium | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | 🔜 Next |
 
 ### 🚀 ADVANCED Tier (For After Jaw-Dropping)
 
@@ -191,6 +191,9 @@
 |---------|----------|--------------|-----------|--------|--------|---------|
 | #1 Streaming | ✅ | ✅ | ✅ | ✅ | ✅ | v1.1.0 |
 | #2 Risk Viz | ✅ | ✅ | ✅ | ✅ | ✅ | v1.2.0 |
+| #3 Highlighter | ✅ | ✅ | ✅ | ✅ | ✅ | v1.3.0 |
+| #4 Voice Input | ✅ | ✅ | ✅ | ✅ | ✅ | v1.3.0 |
+| #5 Share | ✅ | ✅ | ✅ | ✅ | ✅ | v1.3.0 |
 | #3 Highlighter | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | - |
 | #4 Voice | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | - |
 | #5 Share | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | - |
@@ -227,6 +230,9 @@ For each feature:
 |-----------|-----------|--------|----------|
 | 1 | 2.5 hours | 2.5 hours | 0% |
 | 2 | 1 hour | 1 hour | 0% |
+| 3 | 1 hour | 45 min | -25% |
+| 4 | 1 hour | 30 min | -50% |
+| 5 | 45 min | 30 min | -33% |
 | 3 | 1 hour | - | - |
 | 4 | 1 hour | - | - |
 | 5 | 45 min | - | - |
