@@ -51,7 +51,7 @@ async def analyze_contract(text: str, options: Dict[str, Any] = None) -> Dict[st
 
     try:
         completion = await client.beta.chat.completions.parse(
-            model="gpt-4o-2024-08-06", # Using a known structured-output capable model
+            model="gpt-4.1-mini", # Using a known structured-output capable model
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
@@ -128,7 +128,7 @@ Return 3-8 key clauses depending on the contract length."""
         full_response = ""
         
         stream = await client.chat.completions.create(
-            model="gpt-4o-2024-08-06",
+            model="gpt-4.1-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
@@ -275,7 +275,7 @@ Provide 2-4 specific, actionable tips with alternative wording."""
 
     try:
         completion = await client.beta.chat.completions.parse(
-            model="gpt-4o-2024-08-06",
+            model="gpt-4.1-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
