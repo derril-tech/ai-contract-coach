@@ -253,49 +253,72 @@ async def google_auth_exchange(body: ExchangeCodeBody):
 
 @app.post("/agent/run")
 async def run_agent(body: RunBody, background_tasks: BackgroundTasks, request: Request):
-    # Rate Limiting (per IP)
-    client_ip = request.client.host
-    rate_key = f"{PREFIX}:rate:{client_ip}"
-    allowed = await check_rate_limit(rate_key, limit=5, window=60) # 5 reqs / min
-    
-    if not allowed:
-        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    try:
+        # Rate Limiting (per IP)
+        client_ip = "unknown"
+        if request.client:
+            client_ip = request.client.host
+        
+        rate_key = f"{PREFIX}:rate:{client_ip}"
+        
+        # Only check rate limit if redis is available to avoid crashing
+        if redis:
+            try:
+                allowed = await check_rate_limit(rate_key, limit=5, window=60) # 5 reqs / min
+                if not allowed:
+                    raise HTTPException(status_code=429, detail="Rate limit exceeded")
+            except Exception as e:
+                print(f"Rate limit check failed: {e}")
+                # Proceed if rate limit check fails (fail open) or handle as needed
+                pass
 
-    job_id = str(uuid.uuid4())
-    
-    # Initial Job State
-    initial_job = {
-        "id": job_id,
-        "project_id": body.projectId,
-        "kind": "contract_review",
-        "status": "queued",
-        "payload": body.input.model_dump(exclude={"accessToken"}), # Don't log token
-        "created_at": time.time()
-    }
+        job_id = str(uuid.uuid4())
+        
+        # Initial Job State
+        initial_job = {
+            "id": job_id,
+            "project_id": body.projectId,
+            "kind": "contract_review",
+            "status": "queued",
+            "payload": body.input.model_dump(exclude={"accessToken"}), # Don't log token
+            "created_at": time.time()
+        }
 
-    # 1. Cache in Redis
-    if redis:
-        await redis.set(f"{PREFIX}:job:{job_id}", json.dumps(initial_job))
+        # 1. Cache in Redis
+        if redis:
+            try:
+                await redis.set(f"{PREFIX}:job:{job_id}", json.dumps(initial_job))
+            except Exception as e:
+                print(f"Redis cache failed: {e}")
+                # Continue even if Redis fails, rely on DB
 
-    # 2. Persist in Supabase
-    if supabase:
-        try:
-            db_job = {
-                "id": job_id,
-                "project_id": body.projectId,
-                "kind": "contract_review",
-                "status": "queued",
-                "payload": body.input.model_dump(exclude={"accessToken"}),
-            }
-            supabase.table("contractcoach.jobs").insert(db_job).execute()
-        except Exception as e:
-            print(f"Supabase insert failed: {e}")
-            pass
+        # 2. Persist in Supabase
+        if supabase:
+            try:
+                db_job = {
+                    "id": job_id,
+                    "project_id": body.projectId,
+                    "kind": "contract_review",
+                    "status": "queued",
+                    "payload": body.input.model_dump(exclude={"accessToken"}),
+                }
+                supabase.table("contractcoach.jobs").insert(db_job).execute()
+            except Exception as e:
+                print(f"Supabase insert failed: {e}")
+                # If DB fails, we probably shouldn't continue as user can't retrieve result
+                raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
-    # 3. Trigger Background Processing
-    background_tasks.add_task(process_contract_analysis, job_id, body.projectId, body.input)
+        # 3. Trigger Background Processing
+        background_tasks.add_task(process_contract_analysis, job_id, body.projectId, body.input)
 
-    return {"jobId": job_id}
+        return {"jobId": job_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @app.get("/jobs/{job_id}")
 async def get_job(job_id: str):
