@@ -22,8 +22,8 @@
 
 | # | Feature | Priority | Effort | React Showcase | AI Showcase | Status |
 |---|---------|----------|--------|----------------|-------------|--------|
-| 1 | Real-time Streaming Analysis | 🔴 Critical | Medium | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | 🔜 Next |
-| 2 | Interactive Risk Visualization | 🔴 Critical | Low | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⏸️ Pending |
+| 1 | Real-time Streaming Analysis | 🔴 Critical | Medium | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ✅ Complete |
+| 2 | Interactive Risk Visualization | 🔴 Critical | Low | ⭐⭐⭐⭐ | ⭐⭐⭐ | 🔜 Next |
 | 3 | Live Clause Highlighter | 🟡 High | Low | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⏸️ Pending |
 | 4 | Voice Question Input | 🟡 High | Low | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⏸️ Pending |
 | 5 | One-Click Summary Share | 🟡 High | Low | ⭐⭐⭐ | ⭐⭐ | ⏸️ Pending |
@@ -189,7 +189,7 @@
 
 | Feature | Plan Doc | Impl Started | Impl Done | Tested | Merged | Version |
 |---------|----------|--------------|-----------|--------|--------|---------|
-| #1 Streaming | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | - |
+| #1 Streaming | ✅ | ✅ | ✅ | ✅ | ✅ | v1.1.0 |
 | #2 Risk Viz | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | - |
 | #3 Highlighter | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | - |
 | #4 Voice | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | - |
@@ -225,12 +225,12 @@ For each feature:
 
 | Feature # | Estimated | Actual | Variance |
 |-----------|-----------|--------|----------|
-| 1 | TBD | - | - |
-| 2 | TBD | - | - |
-| 3 | TBD | - | - |
-| 4 | TBD | - | - |
-| 5 | TBD | - | - |
-| 6 | TBD | - | - |
+| 1 | 2.5 hours | 2.5 hours | 0% |
+| 2 | 1 hour | - | - |
+| 3 | 1 hour | - | - |
+| 4 | 1 hour | - | - |
+| 5 | 45 min | - | - |
+| 6 | 1.5 hours | - | - |
 
 ---
 
