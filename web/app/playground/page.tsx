@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { UploadCloud, Sparkles, ShieldAlert, ShieldCheck, ArrowRight } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { useAgent } from "@/hooks/useAgent";
 
 interface Clause {
   id: string;
@@ -42,36 +43,28 @@ const mockClauses: Clause[] = [
 export default function PlaygroundPage() {
   const [selectedClause, setSelectedClause] = useState<Clause | null>(mockClauses[1]);
   const [question, setQuestion] = useState("");
-  const [isRunning, setIsRunning] = useState(false);
-  const [messages, setMessages] = useState<
-    { role: "user" | "assistant"; content: string }[]
-  >([
+  
+  // Integrate useAgent Hook
+  const { messages, run, loading: isRunning, error, lastResult } = useAgent("demo-project");
+
+  // Initialize with welcome message if empty
+  const displayMessages = messages.length > 0 ? messages : [
     {
       role: "assistant",
-      content:
-        "I’ve scanned your agreement and highlighted key clauses. Select one on the left to see plain English, risk level, and suggested edits.",
-    },
-  ]);
+      content: "I’ve scanned your agreement and highlighted key clauses. Select one on the left to see plain English, risk level, and suggested edits.",
+    }
+  ];
 
-  const handleAsk = () => {
+  const handleAsk = async () => {
     if (!question.trim()) return;
-    setIsRunning(true);
     const q = question.trim();
-    setMessages((prev) => [...prev, { role: "user", content: q }]);
     setQuestion("");
-
-    // Fake AI response for UI demo
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "Here’s what to push back on:\n\n1. Ask for mutual termination rights.\n2. Clarify that previously earned fees remain payable.\n3. Confirm that termination does not waive confidentiality obligations.",
-        },
-      ]);
-      setIsRunning(false);
-    }, 900);
+    
+    // Call the backend via useAgent
+    await run({
+        text: q, // Send question as text input for now, or structured if backend supports
+        questions: [q] 
+    });
   };
 
   return (
@@ -238,7 +231,7 @@ export default function PlaygroundPage() {
               <CardContent className="flex-1 flex flex-col gap-4 pt-4 min-h-0 pb-4">
                 <ScrollArea className="flex-1 pr-4">
                   <div className="space-y-4">
-                    {messages.map((m, i) => (
+                    {displayMessages.map((m, i) => (
                       <div
                         key={i}
                         className={cn("flex w-full", m.role === "assistant" ? "justify-start" : "justify-end")}
@@ -269,6 +262,13 @@ export default function PlaygroundPage() {
                              <span className="h-1.5 w-1.5 rounded-full bg-text-muted/40 animate-bounce delay-300" />
                           </div>
                        </div>
+                    )}
+                    {error && (
+                        <div className="flex w-full justify-center">
+                            <div className="bg-red-100 text-red-600 rounded-md px-3 py-2 text-xs">
+                                Error: {error}
+                            </div>
+                        </div>
                     )}
                   </div>
                 </ScrollArea>
