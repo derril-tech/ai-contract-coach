@@ -49,6 +49,7 @@ APP_NAME = "contractcoach"
 PREFIX = os.getenv("REDIS_PREFIX", "contractcoach")
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE")
+SUPABASE_SCHEMA = os.getenv("SUPABASE_SCHEMA", "contractcoach")
 REDIS_URL = os.getenv("UPSTASH_REDIS_REST_URL")
 REDIS_TOKEN = os.getenv("UPSTASH_REDIS_REST_TOKEN")
 PUBLIC_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "http://localhost:3000")
@@ -56,7 +57,14 @@ PUBLIC_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "http://localhost:3000")
 # Initialize clients
 supabase: Optional[Client] = None
 if SUPABASE_URL and SUPABASE_KEY:
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    # Create client with schema configuration
+    supabase = create_client(
+        SUPABASE_URL, 
+        SUPABASE_KEY,
+        options={
+            "schema": SUPABASE_SCHEMA
+        }
+    )
 
 redis: Optional[Redis] = None
 if REDIS_URL and REDIS_TOKEN:
@@ -190,7 +198,7 @@ async def process_contract_analysis(job_id: str, project_id: str, input_data: Ag
             "meta": {"jobId": job_id}
         }
         if supabase:
-            supabase.table("contractcoach.messages").insert(user_msg).execute()
+            supabase.table("messages").insert(user_msg).execute()
 
         # 5. Save Assistant Message (Summary)
         assistant_msg = {
@@ -200,7 +208,7 @@ async def process_contract_analysis(job_id: str, project_id: str, input_data: Ag
             "meta": {"jobId": job_id, "risk": result.get("overallRisk")}
         }
         if supabase:
-            supabase.table("contractcoach.messages").insert(assistant_msg).execute()
+            supabase.table("messages").insert(assistant_msg).execute()
 
         # 6. Update Job Status to Done
         final_job_state = {
@@ -214,7 +222,7 @@ async def process_contract_analysis(job_id: str, project_id: str, input_data: Ag
             await redis.set(f"{PREFIX}:job:{job_id}", json.dumps(final_job_state))
         
         if supabase:
-            supabase.table("contractcoach.jobs").update({
+            supabase.table("jobs").update({
                 "status": "done",
                 "result": result,
                 "updated_at": "now()"
@@ -230,7 +238,7 @@ async def process_contract_analysis(job_id: str, project_id: str, input_data: Ag
         if redis:
             await redis.set(f"{PREFIX}:job:{job_id}", json.dumps(error_state))
         if supabase:
-             supabase.table("contractcoach.jobs").update({
+             supabase.table("jobs").update({
                 "status": "error",
                 "result": {"error": str(e)},
                 "updated_at": "now()"
@@ -263,8 +271,8 @@ async def health_check():
     try:
         if supabase:
             # Simple query to test connection
-            supabase.table("contractcoach.profiles").select("id").limit(1).execute()
-            health["services"]["supabase"] = "connected"
+            supabase.table("profiles").select("id").limit(1).execute()
+            health["services"]["supabase"] = f"connected (schema: {SUPABASE_SCHEMA})"
         else:
             health["services"]["supabase"] = "not_configured"
     except Exception as e:
@@ -343,7 +351,7 @@ async def run_agent(body: RunBody, background_tasks: BackgroundTasks, request: R
                     "status": "queued",
                     "payload": body.input.model_dump(exclude={"accessToken"}),
                 }
-                supabase.table("contractcoach.jobs").insert(db_job).execute()
+                supabase.table("jobs").insert(db_job).execute()
             except Exception as e:
                 print(f"Supabase insert failed: {e}")
                 # If DB fails, we probably shouldn't continue as user can't retrieve result
@@ -374,7 +382,7 @@ async def get_job(job_id: str):
     # 2. Fallback to Supabase
     if supabase:
         try:
-            response = supabase.table("contractcoach.jobs").select("*").eq("id", job_id).execute()
+            response = supabase.table("jobs").select("*").eq("id", job_id).execute()
             if response.data and len(response.data) > 0:
                 return response.data[0]
         except Exception as e:
@@ -386,7 +394,7 @@ async def get_job(job_id: str):
 async def get_messages(projectId: str = Query(..., alias="projectId")):
     if supabase:
         try:
-            response = supabase.table("contractcoach.messages")\
+            response = supabase.table("messages")\
                 .select("*")\
                 .eq("project_id", projectId)\
                 .order("created_at", desc=True)\
