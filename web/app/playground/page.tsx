@@ -25,6 +25,7 @@ import { useAgentStream, type Clause } from "@/hooks/useAgentStream";
 import { StreamingClauses } from "@/components/playground/streaming-clauses";
 import { AnalysisProgress } from "@/components/playground/analysis-progress";
 import { RiskMeter, RiskBadge } from "@/components/playground/risk-meter";
+import { RiskSummaryCard } from "@/components/playground/risk-summary-card";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Sample contract for demo
@@ -282,8 +283,27 @@ export default function PlaygroundPage() {
             </Card>
           </div>
 
-          {/* Right column: details & chat */}
+          {/* Right column: risk summary, details & chat */}
           <div className="flex flex-col gap-4 min-h-0">
+            {/* Risk Summary Card - Shows when analysis is complete */}
+            <AnimatePresence>
+              {(isComplete || clauses.length > 0) && !isStreaming && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  animate={{ opacity: 1, height: "auto", marginBottom: 0 }}
+                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <RiskSummaryCard
+                    risk={overallRisk}
+                    clauses={clauses}
+                    summary={summary}
+                    isStreaming={isStreaming}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Clause Details Card */}
             <Card className="border-border-subtle/80 bg-bg-elevated shadow-sm shrink-0">
               <CardHeader className="space-y-1 pb-3 border-b border-border-subtle/50">

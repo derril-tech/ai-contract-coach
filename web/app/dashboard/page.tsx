@@ -4,9 +4,12 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { ShieldAlert, ShieldCheck, ArrowRight, FileText } from "lucide-react";
+import { ShieldAlert, ShieldCheck, ArrowRight, FileText, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
+import { RiskDonut } from "@/components/playground/risk-donut";
+import { RiskBar } from "@/components/playground/risk-summary-card";
+import { motion } from "framer-motion";
 
 const mockContracts = [
   {
@@ -14,38 +17,61 @@ const mockContracts = [
     name: "ACME – Master Services Agreement",
     counterpart: "ACME Corp",
     pages: 24,
-    risk: "Medium",
+    risk: "medium" as const,
     clausesFlagged: 5,
     lastReviewed: "2 hours ago",
+    clauses: [
+      { risk: "low" as const },
+      { risk: "medium" as const },
+      { risk: "medium" as const },
+      { risk: "high" as const },
+      { risk: "low" as const },
+    ],
   },
   {
     id: "2",
     name: "NovaPay – Reseller Agreement",
     counterpart: "NovaPay",
     pages: 16,
-    risk: "High",
+    risk: "high" as const,
     clausesFlagged: 8,
     lastReviewed: "Yesterday",
+    clauses: [
+      { risk: "high" as const },
+      { risk: "high" as const },
+      { risk: "medium" as const },
+      { risk: "high" as const },
+      { risk: "medium" as const },
+      { risk: "low" as const },
+      { risk: "high" as const },
+      { risk: "medium" as const },
+    ],
   },
   {
     id: "3",
     name: "Atlas – Data Processing Addendum",
     counterpart: "Atlas Analytics",
     pages: 9,
-    risk: "Low",
+    risk: "low" as const,
     clausesFlagged: 1,
     lastReviewed: "3 days ago",
+    clauses: [
+      { risk: "low" as const },
+    ],
   },
 ];
 
-function RiskBadge({ risk }: { risk: string }) {
+// Aggregate all clauses for the portfolio donut
+const allClauses = mockContracts.flatMap(c => c.clauses);
+
+function RiskBadge({ risk }: { risk: "low" | "medium" | "high" }) {
   const map: Record<string, string> = {
-    Low: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
-    Medium: "bg-amber-500/10 text-amber-600 border-amber-500/30",
-    High: "bg-red-500/10 text-red-600 border-red-500/30",
+    low: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
+    medium: "bg-amber-500/10 text-amber-600 border-amber-500/30",
+    high: "bg-red-500/10 text-red-600 border-red-500/30",
   };
   return (
-    <Badge variant="outline" className={`text-[10px] font-medium px-2 py-0.5 border ${map[risk] ?? ""}`}>
+    <Badge variant="outline" className={`text-[10px] font-medium px-2 py-0.5 border capitalize ${map[risk] ?? ""}`}>
       {risk} risk
     </Badge>
   );
@@ -100,6 +126,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex flex-col items-end gap-1.5 shrink-0">
                           <RiskBadge risk={c.risk} />
+                          <RiskBar clauses={c.clauses} className="w-16" />
                           <span className="text-[10px] text-text-muted">{c.lastReviewed}</span>
                         </div>
                       </Link>
@@ -115,29 +142,63 @@ export default function DashboardPage() {
             <Card className="border-border-subtle/80 bg-bg-elevated shadow-sm">
               <CardHeader className="space-y-1 pb-3 border-b border-border-subtle/50">
                 <CardTitle className="text-sm font-semibold">Portfolio risk snapshot</CardTitle>
-                <p className="text-[11px] text-text-muted">Across your last 30 contracts</p>
+                <p className="text-[11px] text-text-muted">Across all analyzed clauses</p>
               </CardHeader>
-              <CardContent className="space-y-4 pt-4">
-                <div className="flex items-center justify-between p-2 rounded-md hover:bg-bg-subtle/50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <ShieldCheck className="h-5 w-5 text-emerald-500" />
-                    <span className="text-xs font-medium text-text-secondary">Balanced agreements</span>
-                  </div>
-                  <span className="text-sm font-bold text-text-primary">60%</span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded-md hover:bg-bg-subtle/50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <ShieldAlert className="h-5 w-5 text-amber-500" />
-                    <span className="text-xs font-medium text-text-secondary">Needs negotiation</span>
-                  </div>
-                  <span className="text-sm font-bold text-text-primary">30%</span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded-md hover:bg-bg-subtle/50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <ShieldAlert className="h-5 w-5 text-red-500" />
-                    <span className="text-xs font-medium text-text-secondary">High risk</span>
-                  </div>
-                  <span className="text-sm font-bold text-text-primary">10%</span>
+              <CardContent className="pt-4">
+                {/* Risk Donut Chart */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="flex justify-center"
+                >
+                  <RiskDonut clauses={allClauses} size="md" showLegend={true} />
+                </motion.div>
+
+                {/* Stats breakdown */}
+                <div className="mt-4 pt-4 border-t border-border-subtle/30 space-y-3">
+                  <motion.div 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="flex items-center justify-between p-2 rounded-md hover:bg-bg-subtle/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                      <span className="text-xs font-medium text-text-secondary">Low risk clauses</span>
+                    </div>
+                    <span className="text-sm font-bold text-emerald-500">
+                      {allClauses.filter(c => c.risk === "low").length}
+                    </span>
+                  </motion.div>
+                  <motion.div 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="flex items-center justify-between p-2 rounded-md hover:bg-bg-subtle/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <TrendingUp className="h-5 w-5 text-amber-500" />
+                      <span className="text-xs font-medium text-text-secondary">Medium risk clauses</span>
+                    </div>
+                    <span className="text-sm font-bold text-amber-500">
+                      {allClauses.filter(c => c.risk === "medium").length}
+                    </span>
+                  </motion.div>
+                  <motion.div 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.7 }}
+                    className="flex items-center justify-between p-2 rounded-md hover:bg-bg-subtle/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <ShieldAlert className="h-5 w-5 text-red-500" />
+                      <span className="text-xs font-medium text-text-secondary">High risk clauses</span>
+                    </div>
+                    <span className="text-sm font-bold text-red-500">
+                      {allClauses.filter(c => c.risk === "high").length}
+                    </span>
+                  </motion.div>
                 </div>
               </CardContent>
             </Card>
