@@ -27,7 +27,7 @@
 | 3 | Live Clause Highlighter | 🟡 High | Low | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ✅ Complete |
 | 4 | Voice Question Input | 🟡 High | Low | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ✅ Complete |
 | 5 | One-Click Summary Share | 🟡 High | Low | ⭐⭐⭐ | ⭐⭐ | ✅ Complete |
-| 6 | Smart Negotiation Tips | 🟡 High | Medium | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | 🔜 Next |
+| 6 | Smart Negotiation Tips | 🟡 High | Medium | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ✅ Complete |
 
 ### 🚀 ADVANCED Tier (For After Jaw-Dropping)
 
@@ -194,6 +194,7 @@
 | #3 Highlighter | ✅ | ✅ | ✅ | ✅ | ✅ | v1.3.0 |
 | #4 Voice Input | ✅ | ✅ | ✅ | ✅ | ✅ | v1.3.0 |
 | #5 Share | ✅ | ✅ | ✅ | ✅ | ✅ | v1.3.0 |
+| #6 Negotiation Tips | ✅ | ✅ | ✅ | ✅ | ✅ | v1.4.0 |
 | #3 Highlighter | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | - |
 | #4 Voice | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | - |
 | #5 Share | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | - |
@@ -233,6 +234,7 @@ For each feature:
 | 3 | 1 hour | 45 min | -25% |
 | 4 | 1 hour | 30 min | -50% |
 | 5 | 45 min | 30 min | -33% |
+| 6 | 1.75 hours | 1 hour | -43% |
 | 3 | 1 hour | - | - |
 | 4 | 1 hour | - | - |
 | 5 | 45 min | - | - |
